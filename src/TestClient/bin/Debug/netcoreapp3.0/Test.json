@@ -1,0 +1,14 @@
+[
+  Collection : TestClient.SampleSettingsCollection{
+    SampleIntSetting:12,
+    SampleStringSetting:Not Assigned,
+    SampleEnumSetting:Value2,
+  },
+    Collection : TestClient.ExtendedSampleSettings{
+      ExtendedSampleDecimal:1.25,
+      ExtendedSampleStringArray:System.String[],
+      SampleIntSetting:12,
+      SampleStringSetting:Not Assigned,
+      SampleEnumSetting:Value2,
+    },
+]
