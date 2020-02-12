@@ -54,6 +54,12 @@ namespace Settings.Net.Core
             _settingsCollections = settingCollections;
         }
 
+        /// <summary>
+        /// Static method to create an instance of SettingsManager
+        /// </summary>
+        /// <param name="storage"></param>
+        /// <param name="settingCollections"></param>
+        /// <returns>An initialized SettingsManager object, with all latest values from storage</returns>
         public static SettingsManager CreateSettingsManager(ISettingsStorage storage, List<SettingsCollectionBase> settingCollections)
         {
 
@@ -135,9 +141,19 @@ namespace Settings.Net.Core
         public void Save()
         {
 
-            var dtos = GenerateDTOsFromCollections(_settingsCollections);
+            var dtos = new List<SettingsCollectionDTO>();
 
-            //_storage.WriteAll(_settingsCollections);
+            foreach (var coll in _settingsCollections)
+            {
+                dtos.Add(coll.GenerateDTO());
+            }
+
+            _storage.WriteAll(dtos);
+
+            // Todo: Testing the reading function. It is working fine.
+            // We now need to implement the code to convert back these DTOs to SettingCollections.
+            // Writing DeserializeFromDTO here, while the GenerateDTO are in the collections, seems a little awekward. Can we create a class to perform these To & Fro conversions ?
+            // var collsRead = _storage.ReadAll();
         }
 
         #endregion

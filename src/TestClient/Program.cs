@@ -26,7 +26,10 @@ namespace TestClient
             storage.Configure(Environment.CurrentDirectory + @"\Test.json");
 
             var mgr = SettingsManager.CreateSettingsManager(storage, collectionBases);
-            
+
+            // Save with default settings. Just for testing, for actual you may want to validate and ask user to set the values
+            mgr.Save();
+
         }
 
     }

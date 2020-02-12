@@ -7,6 +7,7 @@ using System.Text;
 using Settings.Net.Core;
 using System.IO;
 using System.Text.Json;
+using System.Linq;
 
 namespace Settings.Net.Storage.JSON
 {
@@ -23,10 +24,14 @@ namespace Settings.Net.Storage.JSON
 
         private string _fileName = "";
 
-		/// <summary>
+        private JsonWriterOptions writerOpts = new JsonWriterOptions() { Indented = true} ;
+
+        private List<SettingsCollectionDTO> dtos = new List<SettingsCollectionDTO>();
+
+        /// <summary>
         /// Check if the storage is ready to handle requests
         /// </summary>
-		public void Configure(string connectionString)
+        public void Configure(string connectionString)
         {
             if (File.Exists(connectionString))
             {
@@ -49,10 +54,13 @@ namespace Settings.Net.Storage.JSON
                 }
             }
         }
-		
+
         void ISettingsStorage.AddSettingCollection(SettingsCollectionDTO settingsCollectionDTO)
         {
-            throw new NotImplementedException();
+            if (!dtos.Contains(settingsCollectionDTO))
+            {
+                dtos.Add(settingsCollectionDTO);
+            }
         }
 
         bool ISettingsStorage.IsReady()
@@ -62,17 +70,27 @@ namespace Settings.Net.Storage.JSON
 
         List<SettingsCollectionDTO> ISettingsStorage.ReadAll()
         {
-            throw new NotImplementedException();
+            ReadOnlySpan<byte> jsonReadOnlySpan = File.ReadAllBytes(_fileName);
+
+            Utf8JsonReader rdr = new Utf8JsonReader(jsonReadOnlySpan);
+            var retList = (List<SettingsCollectionDTO>) JsonSerializer.Deserialize(ref rdr, typeof(List<SettingsCollectionDTO>));
+            return retList;
         }
 
         void ISettingsStorage.UpdateSettingCollectionValues(SettingsCollectionDTO settingsCollection)
         {
-            throw new NotImplementedException();
+            var col = dtos.FirstOrDefault(x => x.TypeAssemblyQualifiedName == settingsCollection.TypeAssemblyQualifiedName);
+            dtos.Remove(col);
+            dtos.Add(settingsCollection);
         }
 
         void ISettingsStorage.WriteAll(List<SettingsCollectionDTO> settingsCollectionsDTOs)
         {
-            throw new NotImplementedException();
+            FileStream fs = new FileStream(_fileName, FileMode.OpenOrCreate);
+            Utf8JsonWriter wrtr = new Utf8JsonWriter(fs, writerOpts);
+            JsonSerializer.Serialize( wrtr, settingsCollectionsDTOs, typeof(List<SettingsCollectionDTO>));
+            fs.Flush();
+            fs.Close();
         }
     }
 }
