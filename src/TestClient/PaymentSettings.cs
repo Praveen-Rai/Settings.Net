@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using ApplicationSettings.Core;
+using Settings.Net.Core;
 
 namespace TestClient
 {

@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ApplicationSettings.Core
+namespace Settings.Net.Core
 {
     /// <summary>
     /// Data transfer object for interacting with storage

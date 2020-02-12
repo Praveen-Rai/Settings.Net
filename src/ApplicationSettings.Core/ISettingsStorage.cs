@@ -5,10 +5,16 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ApplicationSettings.Core
+namespace Settings.Net.Core
 {
     public interface  ISettingsStorage
     {
+		
+		/// <summary>
+        /// Check if the storage is ready to handle requests
+        /// </summary>
+		public void Configure(string connectionString);
+				
         /// <summary>
         /// Check if the storage is ready to handle requests
         /// </summary>

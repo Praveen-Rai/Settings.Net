@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 
-namespace ApplicationSettings.Core
+namespace Settings.Net.Core
 {
     public abstract class SettingsCollectionBase
     {

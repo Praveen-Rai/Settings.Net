@@ -5,11 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
-using ApplicationSettings.Core;
+using Settings.Net.Core;
 using System.Text.Json;
 using System.Linq;
 
-namespace ApplicationSettings.Storage.JSON
+namespace Settings.Net.Storage.JSON
 {
 
     public class Indentation

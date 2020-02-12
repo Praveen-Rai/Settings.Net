@@ -4,11 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using ApplicationSettings.Core;
+using Settings.Net.Core;
 using System.IO;
 using System.Text.Json;
 
-namespace ApplicationSettings.Storage.JSON
+namespace Settings.Net.Storage.JSON
 {
     // Todo : Write function implementations
     // JsonSerialization class needs to be fixed to use the DTOs instead of the bases.
@@ -23,21 +23,24 @@ namespace ApplicationSettings.Storage.JSON
 
         private string _fileName = "";
 
-        public SettingsStorageJSON(string fullFileName)
+		/// <summary>
+        /// Check if the storage is ready to handle requests
+        /// </summary>
+		public void Configure(string connectionString)
         {
-            if (File.Exists(fullFileName))
+            if (File.Exists(connectionString))
             {
                 // ToDo : Check if we have write access to the file
                 isReady = true;
-                _fileName = fullFileName;
+                _fileName = connectionString;
             }
             else
             {
                 try
                 {
                     // ToDo : Check file extension. Note : File extension is not applicable for linux
-                    var file = File.Create(fullFileName);
-                    _fileName = fullFileName;
+                    var file = File.Create(connectionString);
+                    _fileName = connectionString;
                     isReady = true;
                 }
                 catch
@@ -46,7 +49,7 @@ namespace ApplicationSettings.Storage.JSON
                 }
             }
         }
-
+		
         void ISettingsStorage.AddSettingCollection(SettingsCollectionDTO settingsCollectionDTO)
         {
             throw new NotImplementedException();
@@ -54,7 +57,7 @@ namespace ApplicationSettings.Storage.JSON
 
         bool ISettingsStorage.IsReady()
         {
-            throw new NotImplementedException();
+            return isReady;
         }
 
         List<SettingsCollectionDTO> ISettingsStorage.ReadAll()

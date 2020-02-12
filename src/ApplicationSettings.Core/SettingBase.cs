@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace ApplicationSettings.Core
+namespace Settings.Net.Core
 {
     public abstract class SettingBase
     {

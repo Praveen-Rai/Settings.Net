@@ -7,9 +7,9 @@ using System.Text;
 using System.Reflection;
 using System.Linq;
 
-namespace ApplicationSettings.Core
-{
 
+namespace Settings.Net.Core
+{
     /// <summary>
     /// Facade class to work with settings. This is the api for this library 
     /// </summary>
@@ -56,11 +56,6 @@ namespace ApplicationSettings.Core
 
         public static SettingsManager CreateSettingsManager(ISettingsStorage storage, List<SettingsCollectionBase> settingCollections)
         {
-
-            if (manager != null)
-            {
-                throw new Exception("A manager is already created");
-            }
 
             if (_storage == null)
             {
@@ -255,7 +250,7 @@ namespace ApplicationSettings.Core
         //    return retList;
         //}
 
-        #endregion 
+        #endregion
 
     }
 }
