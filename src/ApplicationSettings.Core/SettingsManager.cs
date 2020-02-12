@@ -77,7 +77,11 @@ namespace Settings.Net.Core
 
             var mgr = new SettingsManager(storage, settingCollections);
 
-            // Perform the loading of settings from storage for existing 
+            // Perform the loading of settings from storage for existing
+            if (storage.IsReady())
+            {
+                mgr.GenerateCollectionsFromDTOs(storage.ReadAll());
+            }
 
             return mgr;
 
