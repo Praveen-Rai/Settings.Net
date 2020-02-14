@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>Settings.Net.Storage.JSON</AssemblyName>
+    <RootNamespace>Settings.Net.Storage.JSON</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ApplicationSettings.Core\ApplicationSettings.Core.csproj" />
+  </ItemGroup>
+
+</Project>
