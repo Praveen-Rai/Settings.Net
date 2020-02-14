@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ApplicationSettings.Storage.JSON\ApplicationSettings.Storage.JSON.csproj" />
-    <ProjectReference Include="..\ApplicationSettings.Core\ApplicationSettings.Core.csproj" />
+    <ProjectReference Include="..\Settings.Net.Core\Settings.Net.Core.csproj" />
+    <ProjectReference Include="..\Settings.Net.Storage.JSON\Settings.Net.Storage.JSON.csproj" />
     <ProjectReference Include="..\TestPlugin\TestPlugin.csproj" />
   </ItemGroup>
 
