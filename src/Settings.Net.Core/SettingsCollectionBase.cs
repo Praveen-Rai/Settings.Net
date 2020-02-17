@@ -42,6 +42,7 @@ namespace Settings.Net.Core
             return settings;
 
         }
+                
 
         /// <summary>
         /// Validate current collection values w.r.t to input collection
@@ -49,7 +50,7 @@ namespace Settings.Net.Core
         /// <param name="settingsCollections"></param>
         /// <returns>Failure messages.</returns>
         /// <remarks>The code must also consider non-existence of a particular setting collection in the list.</remarks>
-        public abstract List<string> ValidateSettings(List<SettingsCollectionBase> settingsCollections);
+        public abstract List<ValidationResult> ValidateSettings(List<SettingsCollectionBase> settingsCollections);
 
         /// <summary>
         /// Tranforms the objects into a DTO, which can be consumed by Storage

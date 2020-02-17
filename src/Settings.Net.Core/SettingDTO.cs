@@ -20,7 +20,6 @@ namespace Settings.Net.Core
         /// </summary>
         public string CollectionName { get; set; }
 
-        // Todo : How to deal with nested complex types.
         /// <summary>
         /// Full type name of the value this setting holds.
         /// </summary>

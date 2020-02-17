@@ -18,19 +18,19 @@ namespace TestClient
 
         public Color TextColor { get; set; }
 
-        public override List<string> ValidateSettings(List<SettingsCollectionBase> settingsCollections)
+        public override List<ValidationResult> ValidateSettings(List<SettingsCollectionBase> settingsCollections)
         {
-            List<string> retList = new List<string>();
+            List<ValidationResult> retList = new List<ValidationResult>();
 
-            if (ForegroundColor == BackgroundColor)
-            {
-                retList.Add("Foreground and Background colors cannot be same");
-            }
+            //if (ForegroundColor == BackgroundColor)
+            //{
+            //    retList.Add("Foreground and Background colors cannot be same");
+            //}
 
-            if (TextColor == ForegroundColor || TextColor == BackgroundColor)
-            {
-                retList.Add("Text color cannot be same as foreground or background color");
-            }
+            //if (TextColor == ForegroundColor || TextColor == BackgroundColor)
+            //{
+            //    retList.Add("Text color cannot be same as foreground or background color");
+            //}
 
             return retList;
         }

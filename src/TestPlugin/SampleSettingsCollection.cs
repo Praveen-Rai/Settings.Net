@@ -48,7 +48,7 @@ namespace TestPlugin
 
         public GenericSetting<SampleComplexClass> SampleNested { get; set; }
 
-        public override List<string> ValidateSettings(List<SettingsCollectionBase> settingsCollections)
+        public override List<ValidationResult> ValidateSettings(List<SettingsCollectionBase> settingsCollections)
         {
             throw new NotImplementedException();
         }

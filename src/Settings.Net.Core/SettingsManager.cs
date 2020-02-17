@@ -89,6 +89,17 @@ namespace Settings.Net.Core
 
         #endregion
 
+        #region Public Types
+
+        public enum OperationResult
+        {
+            Success,
+            Warning,
+            Failure,
+        }
+
+        #endregion
+
         #region Public Methods
 
         /// <summary>
@@ -104,21 +115,80 @@ namespace Settings.Net.Core
         /// <summary>
         /// Update the provided setting collection in the store
         /// </summary>
-        /// <param name="settingsCollection"></param>
-        public void UdpateSettingsCollection(SettingsCollectionBase settingsCollection)
+        /// <param name="settingsCollection">Updated collection object</param>
+        /// <param name="validationResults">Out param List of errors/warnings</param>
+        /// <returns>Operation result</returns>
+        public OperationResult UdpateSettingsCollection(SettingsCollectionBase settingsCollection, out List<ValidationResult> validationResults)
         {
-            ValidateSettingValues(settingsCollection);
+            OperationResult result;
+
+            validationResults = new List<ValidationResult>();
+
+            var validationRes = settingsCollection.ValidateSettings(_settingsCollections);
+
+            // If any validation errors, return with the list
+            if (validationRes.Any(x => x.Result == ValidationResult.ResultType.Error))
+            {
+                validationResults = validationRes.Where(x => x.Result == ValidationResult.ResultType.Error).ToList();
+                result = OperationResult.Failure;
+            }
+            else
+            {
+                // If any validation warnings
+                if (validationRes.Any(x => x.Result == ValidationResult.ResultType.Warning))
+                {
+                    validationResults = validationRes.Where(x => x.Result == ValidationResult.ResultType.Warning).ToList();
+                    result = OperationResult.Failure;
+                }
+                else
+                {
+                    validationResults = validationRes;
+                    result = OperationResult.Success;
+                }
+
+                _storage.UpdateSettingCollectionValues(settingsCollection.GenerateDTO());
+            }
+
+            return result;
         }
 
+
         /// <summary>
-        /// Update multiple setting collection in the store
+        /// Update multiple collections in a store
         /// </summary>
-        /// <param name="settingsCollection"></param>
-        public void UdpateSettingsCollection(SettingsCollectionBase[] settingCollections)
+        /// <param name="settingCollections">Array udpated collection objects</param>
+        /// <param name="validationResults">Output list of all validation results</param>
+        /// <returns>Overall operation result.</returns>
+        public OperationResult UdpateSettingsCollection(SettingsCollectionBase[] settingCollections, out List<ValidationResult> validationResults)
         {
+
+            bool ErrorLocated = false;
+
+            bool WarningLocated = false;
+
+            validationResults = new List<ValidationResult>();
+
             foreach (var settingCollection in settingCollections)
             {
-                UdpateSettingsCollection(settingCollection);
+                var CollValRes = new List<ValidationResult>();
+                var OpRes = UdpateSettingsCollection(settingCollection, out CollValRes);
+                validationResults.AddRange(CollValRes);
+
+                if (OpRes == OperationResult.Failure) { ErrorLocated = true; }
+                else if (OpRes == OperationResult.Warning) { WarningLocated = true; }
+            }
+
+            if (ErrorLocated)
+            {
+                return OperationResult.Failure;
+            }
+            else if (WarningLocated)
+            {
+                return OperationResult.Warning;
+            }
+            else
+            {
+                return OperationResult.Success;
             }
         }
 
@@ -165,23 +235,6 @@ namespace Settings.Net.Core
         #region Private Methods
 
         /// <summary>
-        /// Generate DTOs from collections
-        /// </summary>
-        /// <param name="settingsCollections"></param>
-        /// <returns></returns>
-        private List<SettingsCollectionDTO> GenerateDTOsFromCollections(List<SettingsCollectionBase> settingsCollections)
-        {
-            var CollectionDTOs = new List<SettingsCollectionDTO>();
-
-            foreach (var settingCollection in settingsCollections)
-            {
-                CollectionDTOs.Add(settingCollection.GenerateDTO());
-            }
-
-            return CollectionDTOs;
-        }
-
-        /// <summary>
         /// Generate collections from DTOs
         /// </summary>
         /// <param name="settingsCollectionsDTOs"></param>
@@ -226,13 +279,24 @@ namespace Settings.Net.Core
             // Others : Check circular references
         }
 
-        private void ValidateAllSettingValues()
+        private List<ValidationResult> ValidateAllSettingValues()
         {
-            // Todo : Validate all rules against the internal values
+            var validationResults = new List<ValidationResult>();
+
+            foreach (var coll in _settingsCollections)
+            {
+                // Todo : Try .. catch
+                // May be we better create individual result classes for both Collection and Setting
+                var res = coll.ValidateSettings(_settingsCollections);
+                validationResults.AddRange(res);
+            }
+
+            return validationResults;
         }
-        private void ValidateSettingValues(SettingsCollectionBase collection)
+        private List<ValidationResult> ValidateSettingValues(SettingsCollectionBase collection)
         {
-            // Todo : Validate all rules against the internal values
+            var res = collection.ValidateSettings(_settingsCollections);
+            return res;
         }
 
         private void SaveToStorage()
