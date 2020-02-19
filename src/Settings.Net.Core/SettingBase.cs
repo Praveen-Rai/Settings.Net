@@ -10,16 +10,17 @@ using System.Text.Json.Serialization;
 
 namespace Settings.Net.Core
 {
-    public abstract class SettingBase
+    public abstract class SettingBase<TValue>
     {
         /// <summary>
         /// Default constructor for the setting
         /// </summary>
         public SettingBase() { }
 
-        public string ParentCollectionName { get; set; }
-
-        public string PropertyNameInParentCollection { get; set; }
+        /// <summary>
+        /// Name of the group in which the setting is displayed
+        /// </summary>
+        public virtual string Group { get; } = "Un-Grouped";
 
         /// <summary>
         /// Description about the setting, for the user
@@ -27,24 +28,21 @@ namespace Settings.Net.Core
         public abstract string Description { get; }
 
         /// <summary>
-        /// The type of the value this setting holds
-        /// </summary>
-        public abstract Type ValueType { get; }
-
-        /// <summary>
-        /// Default value of the setting
-        /// </summary>
-        public abstract object DefaultValue { get; }
-
-        /// <summary>
         /// Value of the setting
         /// </summary>
-        public abstract object Value { get; set; }
+        public abstract TValue Value { get; set; }
 
         /// <summary>
-        /// If this setting is enabled. This might depend on values of other settings.
+        /// Override the method to perform checks when to enable the setting
         /// </summary>
-        public bool IsEnabled { get; set; }
+        /// <returns>True when needs to be enabled, else false. Default is True</returns>
+        public virtual bool IsEnabled() { return true; }
+
+        /// <summary>
+        /// The validator method to perform validations of the current setting value
+        /// </summary>
+        /// <returns></returns>
+        public virtual ValidationResult Validate() { return new ValidationResult() { Result = ValidationResult.ResultType.Passed, Message = "" }; }
 
         /// <summary>
         /// Tranforms the objects into a DTO, which can be consumed by Storage
@@ -55,15 +53,14 @@ namespace Settings.Net.Core
         {
             var dto = new SettingDTO();
 
-            dto.CollectionName = ParentCollectionName;
-            dto.Name = PropertyNameInParentCollection;
-            dto.ValueAssemblyFullName = ValueType.Assembly.FullName;
-            dto.ValueTypeAssemblyQualifiedName = ValueType.AssemblyQualifiedName;
-            dto.ValueTypeFullName = ValueType.FullName;
+            dto.CollectionName = Group;
+            dto.ValueAssemblyFullName = typeof(TValue).Assembly.FullName;
+            dto.ValueTypeAssemblyQualifiedName = typeof(TValue).AssemblyQualifiedName;
+            dto.ValueTypeFullName = typeof(TValue).FullName;
 
             // If value is one of the allowed types ( all built-in types or except custom classes ) then store as is
             // Else serialize as json string ( for custom classes )
-            if (ConstantValues.AllowedTypes.Contains(ValueType))
+            if (ConstantValues.AllowedTypes.Contains(typeof(TValue)))
             {
                 dto.Value = Value;
             }

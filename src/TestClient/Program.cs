@@ -17,7 +17,7 @@ namespace TestClient
 
             var settings = new SampleSettingsCollection();
             
-            List<SettingsCollectionBase> collectionBases = new List<SettingsCollectionBase>();
+            List<SettingsGroup> collectionBases = new List<SettingsGroup>();
             collectionBases.Add(settings);
 
             //var mgr = new SettingsManager(new SettingsStorageJSON(Environment.CurrentDirectory + @"\Test.json"), collectionBases);

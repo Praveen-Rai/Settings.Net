@@ -42,7 +42,7 @@ namespace Settings.Net.Storage.JSON
     public static class JsonSerialization
     {
        
-        public static string SerializeAllCollections(List<SettingsCollectionBase> settingsCollections, bool keepFormatting = true)
+        public static string SerializeAllCollections(List<SettingsGroup> settingsCollections, bool keepFormatting = true)
         {
             string retVal = "";
 
@@ -61,7 +61,7 @@ namespace Settings.Net.Storage.JSON
             return retVal;
         }
 
-        public static string SerializeSettingCollection(SettingsCollectionBase settingsCollection, Indentation indent, bool keepFormatting = true)
+        public static string SerializeSettingCollection(SettingsGroup settingsCollection, Indentation indent, bool keepFormatting = true)
         {
             indent.Level++;
 

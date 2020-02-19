@@ -13,10 +13,10 @@ namespace Settings.Net.Core
     /// </summary>
     public class SettingsCollectionDTOParser
     {
-        public SettingsCollectionBase ParseDTO(SettingsCollectionDTO settingsCollectionDTO)
+        public SettingsGroup ParseDTO(SettingsCollectionDTO settingsCollectionDTO)
         {
             var collectionType = Type.GetType(settingsCollectionDTO.TypeAssemblyQualifiedName);
-            var settingCollection = (SettingsCollectionBase)Activator.CreateInstance(collectionType);
+            var settingCollection = (SettingsGroup)Activator.CreateInstance(collectionType);
 
             // Assign property values
             List<SettingBase> settings = new List<SettingBase>();
@@ -36,7 +36,7 @@ namespace Settings.Net.Core
             return settingCollection;
         }
 
-        public SettingsCollectionDTO GenerateDTO(SettingsCollectionBase settingsCollection)
+        public SettingsCollectionDTO GenerateDTO(SettingsGroup settingsCollection)
         {
             var dto = new SettingsCollectionDTO();
 
@@ -65,9 +65,9 @@ namespace Settings.Net.Core
             return dto;
         }
 
-        public SettingsCollectionBase[] ParseDTO(SettingsCollectionDTO[] settingsCollectionDTO)
+        public SettingsGroup[] ParseDTO(SettingsCollectionDTO[] settingsCollectionDTO)
         {
-            var retList = new List<SettingsCollectionBase>();
+            var retList = new List<SettingsGroup>();
 
             foreach (var scdto in settingsCollectionDTO)
             {
@@ -78,7 +78,7 @@ namespace Settings.Net.Core
             return retList.ToArray();
         }
 
-        public SettingsCollectionDTO[] GenerateDTO(SettingsCollectionBase[] settingsCollection)
+        public SettingsCollectionDTO[] GenerateDTO(SettingsGroup[] settingsCollection)
         {
             var retList = new List<SettingsCollectionDTO>();
 
