@@ -4,10 +4,11 @@ using System.Text;
 using System.Text.Json;
 using System.Linq;
 using System.Text.Json.Serialization;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Settings.Net.Core
 {
-    public abstract class SettingBase
+    public abstract class SettingBase : IEquatable<SettingBase>
     {
 
         /// <summary>
@@ -86,6 +87,17 @@ namespace Settings.Net.Core
             return dto;
 
         }
-
+        
+        public bool Equals([AllowNull] SettingBase setting)
+        {
+            if(setting.SettingType == SettingType)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }

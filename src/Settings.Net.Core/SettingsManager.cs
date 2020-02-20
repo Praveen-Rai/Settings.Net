@@ -80,7 +80,7 @@ namespace Settings.Net.Core
             // Perform the loading of settings from storage for existing
             if (storage.IsReady())
             {
-                mgr.GenerateCollectionsFromDTOs(storage.ReadAll());
+                mgr.GenerateSettingsFromDTOs(storage.ReadAll());
             }
 
             return mgr;
@@ -118,114 +118,28 @@ namespace Settings.Net.Core
 
             if(valRes.Result == ValidationResult.ResultType.Passed || valRes.Result == ValidationResult.ResultType.Warning)
             {
-                
-            }
-        }
+                var x = _settings.FirstOrDefault(x => x.SettingType == setting.SettingType);
 
-        /// <summary>
-        /// Update the provided setting collection in the store
-        /// </summary>
-        /// <param name="setting">Updated collection object</param>
-        /// <param name="validationResults">Out param List of errors/warnings</param>
-        /// <returns>Operation result</returns>
-        public OperationResult UdpateSettingsCollection(SettingBase setting, out List<ValidationResult> validationResults)
-        {
-            OperationResult result;
-
-            validationResults = new List<ValidationResult>();
-
-            var validationRes = setting.ValidateSettings(_settings);
-
-            // If any validation errors, return with the list
-            if (validationRes.Any(x => x.Result == ValidationResult.ResultType.Error))
-            {
-                validationResults = validationRes.Where(x => x.Result == ValidationResult.ResultType.Error).ToList();
-                result = OperationResult.Failure;
-            }
-            else
-            {
-                // If any validation warnings
-                if (validationRes.Any(x => x.Result == ValidationResult.ResultType.Warning))
+                if( x!= null)
                 {
-                    validationResults = validationRes.Where(x => x.Result == ValidationResult.ResultType.Warning).ToList();
-                    result = OperationResult.Failure;
+                    _settings.Remove(x);
+                    _settings.Add(setting);
                 }
                 else
                 {
-                    validationResults = validationRes;
-                    result = OperationResult.Success;
+                    throw new ArgumentException("Setting not found");
                 }
-
-                _storage.UpdateSettingCollectionValues(setting.GenerateDTO());
             }
 
-            return result;
+            return valRes;
         }
 
 
-        /// <summary>
-        /// Update multiple collections in a store
-        /// </summary>
-        /// <param name="settingCollections">Array udpated collection objects</param>
-        /// <param name="validationResults">Output list of all validation results</param>
-        /// <returns>Overall operation result.</returns>
-        public OperationResult UdpateSettingsCollection(SettingsGroup[] settingCollections, out List<ValidationResult> validationResults)
-        {
-
-            bool ErrorLocated = false;
-
-            bool WarningLocated = false;
-
-            validationResults = new List<ValidationResult>();
-
-            foreach (var settingCollection in settingCollections)
-            {
-                var CollValRes = new List<ValidationResult>();
-                var OpRes = UdpateSettingsCollection(settingCollection, out CollValRes);
-                validationResults.AddRange(CollValRes);
-
-                if (OpRes == OperationResult.Failure) { ErrorLocated = true; }
-                else if (OpRes == OperationResult.Warning) { WarningLocated = true; }
-            }
-
-            if (ErrorLocated)
-            {
-                return OperationResult.Failure;
-            }
-            else if (WarningLocated)
-            {
-                return OperationResult.Warning;
-            }
-            else
-            {
-                return OperationResult.Success;
-            }
-        }
-
-        /// <summary>
-        /// Add a new settings collection
-        /// </summary>
-        /// <param name="settingsCollection"></param>
-        /// <remarks>Raises an invalid argument exception if the Collection is not direct sub class of SettingsCollectionBase</remarks>
-        public void AddSettingsCollection(SettingsGroup settingsCollection)
-        {
-            if (settingsCollection.GetType().BaseType != typeof(SettingsGroup))
-            {
-                throw new ArgumentException("The collection type must be directly derived from SettingsCollectionBase. Multi-level inheritance is not supported");
-            }
-
-            lock (_settings)
-            {
-                _settings.Add(settingsCollection);
-            }
-        }
-
-        public IReadOnlyList<SettingsGroup> SettingsCollections => _settings;
 
         public void Save()
         {
 
-            var dtos = new List<SettingsCollectionDTO>();
+            var dtos = new List<SettingDTO>();
 
             foreach (var coll in _settings)
             {
@@ -247,24 +161,19 @@ namespace Settings.Net.Core
         /// <summary>
         /// Generate collections from DTOs
         /// </summary>
-        /// <param name="settingsCollectionsDTOs"></param>
+        /// <param name="settingDTOs"></param>
         /// <returns></returns>
-        private List<SettingDTO> GenerateCollectionsFromDTOs(List<SettingDTO> settingsCollectionsDTOs)
+        private List<SettingDTO> GenerateSettingsFromDTOs(List<SettingDTO> settingDTOs)
         {
             // Assumption the _settingsCollections is already populated before calling this function
             // Which is logical
 
-            var Collection = new List<SettingsGroup>();
+            var Collection = new List<SettingDTO>();
 
-            foreach (var dto in settingsCollectionsDTOs)
+            foreach (var dto in settingDTOs)
             {
-                var col = _settings.Find(x => x.GetType().AssemblyQualifiedName == dto.TypeAssemblyQualifiedName);
+                var settingType = Type.GetType(dto.SettingTypeName);
 
-                foreach (var settingDto in dto.Settings)
-                {
-                    var prop = col.GetType().GetProperties().First(x => settingDto.CollectionName == dto.TypeFullName && x.Name == settingDto.CollectionName);
-                    prop.SetValue(prop, settingDto.Value);
-                }
             }
 
             return Collection;
@@ -293,20 +202,13 @@ namespace Settings.Net.Core
         {
             var validationResults = new List<ValidationResult>();
 
-            foreach (var coll in _settings)
+            foreach (var setting in _settings)
             {
-                // Todo : Try .. catch
-                // May be we better create individual result classes for both Collection and Setting
-                var res = coll.ValidateSettings(_settings);
-                validationResults.AddRange(res);
+                var res = setting.Validate();
+                validationResults.Add(res);
             }
 
             return validationResults;
-        }
-        private List<ValidationResult> ValidateSettingValues(SettingsGroup collection)
-        {
-            var res = collection.ValidateSettings(_settings);
-            return res;
         }
 
         private void SaveToStorage()
@@ -315,34 +217,6 @@ namespace Settings.Net.Core
 
             // _storage.WriteAll(_settingsCollections);
         }
-
-
-        // It does not make sense to allow any collection to override an existing collection.
-        // The better approach is to let both of the collections always exist independently
-        // The validator can then send a message to the user if some value of the parent is not supported by the child.
-        // On the flip side if a plugin wants to add a few more options to existing combo-box, it won't be able to do it.
-        ///// <summary>
-        ///// Splits a derived collection class into all intermediate derivations from SettingsCollectionBase, in case of multi-level inheritance.
-        ///// </summary>
-        ///// <param name="settingsCollection"></param>
-        ///// <returns></returns>
-        ///// <remarks>Used when derivation from a collection is supported, particulary for overriding values.</remarks>
-        //private List<SettingsCollectionBase> FlattenCollection(SettingsCollectionBase settingsCollection)
-        //{
-        //    var retList = new List<SettingsCollectionBase>();
-
-        //    var baseType = settingsCollection.GetType().BaseType;
-
-        //    do
-        //    {
-        //        var baseTypeInst = (SettingsCollectionBase)Activator.CreateInstance(baseType);
-        //        baseTypeInst = settingsCollection;
-        //        retList.Add(baseTypeInst);
-
-        //    } while (baseType != typeof(SettingsCollectionBase));
-
-        //    return retList;
-        //}
 
         #endregion
 

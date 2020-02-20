@@ -13,7 +13,7 @@ namespace Settings.Net.Core
         /// Name of the setting
         /// </summary>
         /// <remarks>Property name in the parent collection</remarks>
-        public string Name { get; set; }
+        public string SettingTypeName { get; set; }
 
         /// <summary>
         /// Name of the setting collection in which the setting is defined
