@@ -25,25 +25,25 @@ namespace Settings.Net.Core
         /// Read all settings from the storage
         /// </summary>
         /// <returns></returns>
-        public List<SettingsCollectionDTO> ReadAll();
+        public List<SettingDTO> ReadAll();
 
         /// <summary>
         /// Write all settings to the storage
         /// </summary>
-        /// <param name="settingsCollectionsDTOs"></param>
-        public void WriteAll(List<SettingsCollectionDTO> settingsCollectionsDTOs);
+        /// <param name="settingsDTO"></param>
+        public void WriteAll(List<SettingDTO> settingsDTO);
 
         /// <summary>
         /// Add a new settings collection to the storage
         /// </summary>
-        /// <param name="settingsCollectionDTO"></param>
-        public void AddSettingCollection(SettingsCollectionDTO settingsCollectionDTO);
+        /// <param name="settingDTO"></param>
+        public void AddSetting(SettingDTO settingDTO);
 
         /// <summary>
         /// Update values of a setting collection
         /// </summary>
-        /// <param name="settingsCollectionBase"></param>
-        public void UpdateSettingCollectionValues(SettingsCollectionDTO settingsCollection);
+        /// <param name="settingDTO"></param>
+        public void UpdateSetting(SettingDTO settingDTO);
 
     }
 }

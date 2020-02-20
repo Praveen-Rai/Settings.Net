@@ -1,36 +1,24 @@
-﻿// Copyright (c) 2020 Praveen Rai
-// This code is licensed under MIT license (see LICENSE.txt for details)
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Linq;
 using System.Text.Json;
+using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace Settings.Net.Core
 {
-    public abstract class SettingBase<TValue>
+    public abstract class SettingBase
     {
-        /// <summary>
-        /// Default constructor for the setting
-        /// </summary>
-        public SettingBase() { }
-
-        /// <summary>
-        /// Name of the group in which the setting is displayed
-        /// </summary>
-        public virtual string Group { get; } = "Un-Grouped";
 
         /// <summary>
         /// Description about the setting, for the user
         /// </summary>
         public abstract string Description { get; }
-
+        
         /// <summary>
-        /// Value of the setting
+        /// Name of the group in which the setting is displayed
         /// </summary>
-        public abstract TValue Value { get; set; }
+        public virtual string Group { get; } = "Un-Grouped";
 
         /// <summary>
         /// Override the method to perform checks when to enable the setting
@@ -45,6 +33,21 @@ namespace Settings.Net.Core
         public virtual ValidationResult Validate() { return new ValidationResult() { Result = ValidationResult.ResultType.Passed, Message = "" }; }
 
         /// <summary>
+        /// The type of the setting
+        /// </summary>
+        public abstract Type SettingType { get; }
+
+        /// <summary>
+        /// Current Value of the setting
+        /// </summary>
+        public abstract object SettingValue { get; set; }
+
+        /// <summary>
+        /// The value that the setting holds
+        /// </summary>
+        public abstract Type ValueType { get; }
+
+        /// <summary>
         /// Tranforms the objects into a DTO, which can be consumed by Storage
         /// </summary>
         /// <returns>Return a DTO</returns>
@@ -54,15 +57,15 @@ namespace Settings.Net.Core
             var dto = new SettingDTO();
 
             dto.CollectionName = Group;
-            dto.ValueAssemblyFullName = typeof(TValue).Assembly.FullName;
-            dto.ValueTypeAssemblyQualifiedName = typeof(TValue).AssemblyQualifiedName;
-            dto.ValueTypeFullName = typeof(TValue).FullName;
+            dto.ValueAssemblyFullName = ValueType.Assembly.FullName;
+            dto.ValueTypeAssemblyQualifiedName = ValueType.AssemblyQualifiedName;
+            dto.ValueTypeFullName = ValueType.FullName;
 
             // If value is one of the allowed types ( all built-in types or except custom classes ) then store as is
             // Else serialize as json string ( for custom classes )
-            if (ConstantValues.AllowedTypes.Contains(typeof(TValue)))
+            if (ConstantValues.AllowedTypes.Contains(ValueType))
             {
-                dto.Value = Value;
+                dto.Value = SettingValue;
             }
             else
             {
@@ -71,7 +74,7 @@ namespace Settings.Net.Core
                 // Enum member value is suspected to be changed, and moreover isn't expressive when seen in config file.
                 // We need to write code to go through the nested types and convert all enums used to their string representations.
                 // Note: JsonSerializer will only serialize public properties and not fields.
-                dto.Value = JsonSerializer.Serialize(Value);
+                dto.Value = JsonSerializer.Serialize(SettingValue);
 
                 string v = (string)dto.Value;
                 Type t = Type.GetType(dto.ValueTypeAssemblyQualifiedName);

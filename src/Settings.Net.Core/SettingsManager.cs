@@ -20,7 +20,7 @@ namespace Settings.Net.Core
         /// <summary>
         /// Static list of all setting collections
         /// </summary>
-        private static List<SettingDTO> _settings;
+        private static List<SettingBase> _settings;
 
         /// <summary>
         /// Storage to be used for the settings
@@ -35,9 +35,9 @@ namespace Settings.Net.Core
         /// Default constructor
         /// </summary>
         /// <param name="storage"></param>
-        /// <param name="settingCollections"></param>
+        /// <param name="settings"></param>
         /// <remarks>The parameters ensure that the manager is ready to use immediately after creation</remarks>
-        private SettingsManager(ISettingsStorage storage, List<SettingsGroup> settingCollections)
+        private SettingsManager(ISettingsStorage storage, List<SettingBase> settings)
         {
             if (_storage == null)
             {
@@ -48,19 +48,19 @@ namespace Settings.Net.Core
             if (_settings == null)
             {
                 // ToDo : If lock is needed here ?
-                _settings = new List<SettingsGroup>();
+                _settings = new List<SettingBase>();
             }
 
-            _settings = settingCollections;
+            _settings = settings;
         }
 
         /// <summary>
         /// Static method to create an instance of SettingsManager
         /// </summary>
         /// <param name="storage"></param>
-        /// <param name="settingCollections"></param>
+        /// <param name="settings"></param>
         /// <returns>An initialized SettingsManager object, with all latest values from storage</returns>
-        public static SettingsManager CreateSettingsManager(ISettingsStorage storage, List<SettingsGroup> settingCollections)
+        public static SettingsManager CreateSettingsManager(ISettingsStorage storage, List<SettingBase> settings)
         {
 
             if (_storage == null)
@@ -72,10 +72,10 @@ namespace Settings.Net.Core
             if (_settings == null)
             {
                 // ToDo : If lock is needed here ?
-                _settings = new List<SettingsGroup>();
+                _settings = new List<SettingBase>();
             }
 
-            var mgr = new SettingsManager(storage, settingCollections);
+            var mgr = new SettingsManager(storage, settings);
 
             // Perform the loading of settings from storage for existing
             if (storage.IsReady())
@@ -107,24 +107,34 @@ namespace Settings.Net.Core
         /// </summary>
         /// <param name="type">Type of the setting collection</param>
         /// <returns></returns>
-        public T GetInstance<T>() where T : SettingsGroup
+        public T GetInstance<T>() where T : SettingBase
         {
             return (T)_settings.FirstOrDefault(x => x.GetType() == typeof(T));
+        }
+
+        public ValidationResult UpdateSetting(SettingBase setting)
+        {
+            var valRes = setting.Validate();
+
+            if(valRes.Result == ValidationResult.ResultType.Passed || valRes.Result == ValidationResult.ResultType.Warning)
+            {
+                
+            }
         }
 
         /// <summary>
         /// Update the provided setting collection in the store
         /// </summary>
-        /// <param name="settingsCollection">Updated collection object</param>
+        /// <param name="setting">Updated collection object</param>
         /// <param name="validationResults">Out param List of errors/warnings</param>
         /// <returns>Operation result</returns>
-        public OperationResult UdpateSettingsCollection(SettingsGroup settingsCollection, out List<ValidationResult> validationResults)
+        public OperationResult UdpateSettingsCollection(SettingBase setting, out List<ValidationResult> validationResults)
         {
             OperationResult result;
 
             validationResults = new List<ValidationResult>();
 
-            var validationRes = settingsCollection.ValidateSettings(_settings);
+            var validationRes = setting.ValidateSettings(_settings);
 
             // If any validation errors, return with the list
             if (validationRes.Any(x => x.Result == ValidationResult.ResultType.Error))
@@ -146,7 +156,7 @@ namespace Settings.Net.Core
                     result = OperationResult.Success;
                 }
 
-                _storage.UpdateSettingCollectionValues(settingsCollection.GenerateDTO());
+                _storage.UpdateSettingCollectionValues(setting.GenerateDTO());
             }
 
             return result;
@@ -239,7 +249,7 @@ namespace Settings.Net.Core
         /// </summary>
         /// <param name="settingsCollectionsDTOs"></param>
         /// <returns></returns>
-        private List<SettingsGroup> GenerateCollectionsFromDTOs(List<SettingsCollectionDTO> settingsCollectionsDTOs)
+        private List<SettingDTO> GenerateCollectionsFromDTOs(List<SettingDTO> settingsCollectionsDTOs)
         {
             // Assumption the _settingsCollections is already populated before calling this function
             // Which is logical
@@ -264,7 +274,7 @@ namespace Settings.Net.Core
         /// Load all settings from storage
         /// </summary>
         /// <returns></returns>
-        private List<SettingsCollectionDTO> LoadFromStorage()
+        private List<SettingDTO> LoadFromStorage()
         {
             return _storage.ReadAll();
         }

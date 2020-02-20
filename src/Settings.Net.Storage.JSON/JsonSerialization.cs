@@ -88,7 +88,7 @@ namespace Settings.Net.Storage.JSON
             return retVal;
         }
 
-        private static string SerializeSetting(SettingBase setting, Indentation indent, bool keepFormatting)
+        private static string SerializeSetting(GenericSettingBase setting, Indentation indent, bool keepFormatting)
         {
             string retVal = "";
             //indent.IndentLevel++;

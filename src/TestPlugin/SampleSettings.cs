@@ -30,7 +30,7 @@ namespace TestPlugin
         public ColorRGB SampleNestedStruct { get; set; } = new ColorRGB() { Red = 125, Green = 125, Blue = 125 };
     }
 
-    public class SampleIntSetting : SettingBase<int>
+    public class SampleIntSetting : GenericSettingBase<int>
     {
         public override string Description => "This is sample integer setting";
 
@@ -40,14 +40,14 @@ namespace TestPlugin
 
     }
 
-    public class SampleStringSetting : SettingBase<string>
+    public class SampleStringSetting : GenericSettingBase<string>
     {
         public override string Description => "This is sample string setting";
 
         public override string Value { get; set; } = "Default Value";
     }
 
-    public class SampleComplexSetting : SettingBase<SampleComplexClass>
+    public class SampleComplexSetting : GenericSettingBase<SampleComplexClass>
     {
         public override string Description => "This is sample string setting";
 
