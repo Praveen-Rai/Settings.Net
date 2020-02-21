@@ -15,17 +15,19 @@ namespace TestClient
         static void Main(string[] args)
         {
 
-            var settings = new SampleSettingsCollection();
-            
-            List<SettingsGroup> collectionBases = new List<SettingsGroup>();
-            collectionBases.Add(settings);
+                   
+            List<SettingBase> settings = new List<SettingBase>();
+            settings.Add(new SampleComplexSetting());
+            settings.Add(new SampleIntSetting());
+            settings.Add(new SampleStringSetting());
+                        
 
             //var mgr = new SettingsManager(new SettingsStorageJSON(Environment.CurrentDirectory + @"\Test.json"), collectionBases);
             var storage = new SettingsStorageJSON();
 
             storage.Configure(Environment.CurrentDirectory + @"\Test.json");
 
-            var mgr = SettingsManager.CreateSettingsManager(storage, collectionBases);
+            var mgr = SettingsManager.CreateSettingsManager(storage, settings);
 
             // Save with default settings. Just for testing, for actual you may want to validate and ask user to set the values
             mgr.Save();

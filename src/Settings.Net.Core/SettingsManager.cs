@@ -80,7 +80,12 @@ namespace Settings.Net.Core
             // Perform the loading of settings from storage for existing
             if (storage.IsReady())
             {
-                mgr.GenerateSettingsFromDTOs(storage.ReadAll());
+
+                if(storage.ReadAll().Count > 0)
+                {
+                    mgr.ReadValuesFromDTOs(storage.ReadAll());
+                }
+                
             }
 
             return mgr;
@@ -163,7 +168,7 @@ namespace Settings.Net.Core
         /// </summary>
         /// <param name="settingDTOs"></param>
         /// <returns></returns>
-        private List<SettingDTO> GenerateSettingsFromDTOs(List<SettingDTO> settingDTOs)
+        private void ReadValuesFromDTOs(List<SettingDTO> settingDTOs)
         {
             // Assumption the _settingsCollections is already populated before calling this function
             // Which is logical
@@ -172,11 +177,12 @@ namespace Settings.Net.Core
 
             foreach (var dto in settingDTOs)
             {
-                var settingType = Type.GetType(dto.SettingTypeName);
+                var setting = _settings.FirstOrDefault(x => x.SettingType.Name == dto.SettingTypeName);
+                var valType = Type.GetType(dto.ValueTypeAssemblyQualifiedName);
+                setting.SettingValue = dto.Value;
 
             }
 
-            return Collection;
         }
 
         /// <summary>

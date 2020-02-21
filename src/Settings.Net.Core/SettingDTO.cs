@@ -3,11 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace Settings.Net.Core
 {
-    public class SettingDTO
+    public class SettingDTO : IEquatable<SettingDTO>
     {
         /// <summary>
         /// Name of the setting
@@ -40,5 +41,9 @@ namespace Settings.Net.Core
         /// </summary>
         public object? Value { get; set; }
 
+        public bool Equals([AllowNull] SettingDTO other)
+        {
+            if(SettingTypeName == other.SettingTypeName) { return true; } else { return false; }
+        }
     }
 }

@@ -26,7 +26,17 @@ namespace Settings.Net.Storage.JSON
 
         private JsonWriterOptions writerOpts = new JsonWriterOptions() { Indented = true} ;
 
-        private List<SettingsCollectionDTO> dtos = new List<SettingsCollectionDTO>();
+        private List<SettingDTO> dtos = new List<SettingDTO>();
+
+        public void AddSetting(SettingDTO settingDTO)
+        {
+            if (!dtos.Contains(settingDTO))
+            {
+                dtos.Add(settingDTO);
+            }
+
+            WriteAll(dtos);
+        }
 
         /// <summary>
         /// Check if the storage is ready to handle requests
@@ -55,12 +65,30 @@ namespace Settings.Net.Storage.JSON
             }
         }
 
-        void ISettingsStorage.AddSettingCollection(SettingsCollectionDTO settingsCollectionDTO)
+        public List<SettingDTO> ReadAll()
         {
-            if (!dtos.Contains(settingsCollectionDTO))
-            {
-                dtos.Add(settingsCollectionDTO);
-            }
+            ReadOnlySpan<byte> jsonReadOnlySpan = File.ReadAllBytes(_fileName);
+
+            Utf8JsonReader rdr = new Utf8JsonReader(jsonReadOnlySpan);
+            var retList = (List<SettingDTO>)JsonSerializer.Deserialize(ref rdr, typeof(List<SettingDTO>));
+            return retList;
+        }
+
+        public void UpdateSetting(SettingDTO settingDTO)
+        {
+            var dto = dtos.FirstOrDefault(x => x.SettingTypeName == settingDTO.SettingTypeName);
+            dto.Value = settingDTO.Value;
+
+            WriteAll(dtos);
+        }
+
+        public void WriteAll(List<SettingDTO> settingsDTO)
+        {
+            FileStream fs = new FileStream(_fileName, FileMode.OpenOrCreate);
+            Utf8JsonWriter wrtr = new Utf8JsonWriter(fs, writerOpts);
+            JsonSerializer.Serialize(wrtr, settingsDTO, typeof(List<SettingDTO>));
+            fs.Flush();
+            fs.Close();
         }
 
         bool ISettingsStorage.IsReady()
@@ -68,29 +96,5 @@ namespace Settings.Net.Storage.JSON
             return isReady;
         }
 
-        List<SettingsCollectionDTO> ISettingsStorage.ReadAll()
-        {
-            ReadOnlySpan<byte> jsonReadOnlySpan = File.ReadAllBytes(_fileName);
-
-            Utf8JsonReader rdr = new Utf8JsonReader(jsonReadOnlySpan);
-            var retList = (List<SettingsCollectionDTO>) JsonSerializer.Deserialize(ref rdr, typeof(List<SettingsCollectionDTO>));
-            return retList;
-        }
-
-        void ISettingsStorage.UpdateSettingCollectionValues(SettingsCollectionDTO settingsCollection)
-        {
-            var col = dtos.FirstOrDefault(x => x.TypeAssemblyQualifiedName == settingsCollection.TypeAssemblyQualifiedName);
-            dtos.Remove(col);
-            dtos.Add(settingsCollection);
-        }
-
-        void ISettingsStorage.WriteAll(List<SettingsCollectionDTO> settingsCollectionsDTOs)
-        {
-            FileStream fs = new FileStream(_fileName, FileMode.OpenOrCreate);
-            Utf8JsonWriter wrtr = new Utf8JsonWriter(fs, writerOpts);
-            JsonSerializer.Serialize( wrtr, settingsCollectionsDTOs, typeof(List<SettingsCollectionDTO>));
-            fs.Flush();
-            fs.Close();
-        }
     }
 }
