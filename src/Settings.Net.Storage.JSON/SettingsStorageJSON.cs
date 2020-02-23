@@ -70,6 +70,9 @@ namespace Settings.Net.Storage.JSON
             ReadOnlySpan<byte> jsonReadOnlySpan = File.ReadAllBytes(_fileName);
 
             Utf8JsonReader rdr = new Utf8JsonReader(jsonReadOnlySpan);
+
+            if(rdr.BytesConsumed == 0) { return new List<SettingDTO>(); }
+            
             var retList = (List<SettingDTO>)JsonSerializer.Deserialize(ref rdr, typeof(List<SettingDTO>));
             return retList;
         }

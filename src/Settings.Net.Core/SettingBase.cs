@@ -57,6 +57,7 @@ namespace Settings.Net.Core
         {
             var dto = new SettingDTO();
 
+            dto.SettingTypeName = GetType().FullName;
             dto.CollectionName = Group;
             dto.ValueAssemblyFullName = ValueType.Assembly.FullName;
             dto.ValueTypeAssemblyQualifiedName = ValueType.AssemblyQualifiedName;
