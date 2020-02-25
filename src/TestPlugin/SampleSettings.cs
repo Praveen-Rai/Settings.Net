@@ -21,7 +21,7 @@ namespace TestPlugin
         public int Green { get; set; }
         public int Blue { get; set; }
     }
-    public class SampleComplexClass
+    public class SampleClass
     {
         public int IntField = 10;
 
@@ -47,11 +47,19 @@ namespace TestPlugin
         public override string Value { get; set; } = "Default Value";
     }
 
-    public class SampleComplexSetting : GenericSettingBase<SampleComplexClass>
+    public class SampleClassSetting : GenericSettingBase<SampleClass>
     {
         public override string Description => "This is sample string setting";
 
-        public override SampleComplexClass Value { get; set; } = new SampleComplexClass();
+        public override SampleClass Value { get; set; } = new SampleClass();
+    }
+
+    public class SampleCustomEnumSetting : GenericSettingBase<SampleEnum>
+    {
+        public override string Description => "This is a custom Enum setting";
+
+        public override SampleEnum Value { get; set; } = SampleEnum.Value2;
+
     }
 
 }

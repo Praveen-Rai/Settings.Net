@@ -17,10 +17,10 @@ namespace TestClient
 
                    
             List<SettingBase> settings = new List<SettingBase>();
-            settings.Add(new SampleComplexSetting());
+            settings.Add(new SampleClassSetting());
             settings.Add(new SampleIntSetting());
             settings.Add(new SampleStringSetting());
-                        
+            settings.Add(new SampleCustomEnumSetting());
 
             //var mgr = new SettingsManager(new SettingsStorageJSON(Environment.CurrentDirectory + @"\Test.json"), collectionBases);
             var storage = new SettingsStorageJSON();

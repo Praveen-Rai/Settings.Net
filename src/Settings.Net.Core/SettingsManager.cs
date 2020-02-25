@@ -177,7 +177,7 @@ namespace Settings.Net.Core
 
             foreach (var dto in settingDTOs)
             {
-                var setting = _settings.FirstOrDefault(x => x.SettingType.Name == dto.SettingTypeName);
+                var setting = _settings.FirstOrDefault(x => x.SettingType.FullName == dto.SettingTypeName);
                 var valType = Type.GetType(dto.ValueTypeAssemblyQualifiedName);
                 setting.SettingValue = dto.Value;
 
