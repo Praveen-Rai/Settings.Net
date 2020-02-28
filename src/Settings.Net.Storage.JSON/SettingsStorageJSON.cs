@@ -11,8 +11,6 @@ using System.Linq;
 
 namespace Settings.Net.Storage.JSON
 {
-    // Todo : Write function implementations
-    // JsonSerialization class needs to be fixed to use the DTOs instead of the bases.
 
     /// <summary>
     /// Class representing json storage
@@ -57,6 +55,7 @@ namespace Settings.Net.Storage.JSON
                     var file = File.Create(connectionString);
                     _fileName = connectionString;
                     isReady = true;
+                    file.Close();
                 }
                 catch
                 {
@@ -69,11 +68,17 @@ namespace Settings.Net.Storage.JSON
         {
             ReadOnlySpan<byte> jsonReadOnlySpan = File.ReadAllBytes(_fileName);
 
-            Utf8JsonReader rdr = new Utf8JsonReader(jsonReadOnlySpan);
+            // If file is empty
+            if(jsonReadOnlySpan.Length == 0)
+            {
+                return new List<SettingDTO>();
+            }
 
-            if(rdr.BytesConsumed == 0) { return new List<SettingDTO>(); }
+            Utf8JsonReader rdr = new Utf8JsonReader(jsonReadOnlySpan);
             
             var retList = (List<SettingDTO>)JsonSerializer.Deserialize(ref rdr, typeof(List<SettingDTO>));
+            // Todo : The complex type values are returned as JsonElemnt (string). Need to convert it into the required type before returing.
+            // https://docs.microsoft.com/en-us/dotnet/api/system.type?view=netframework-4.8#what-types-does-a-type-object-represent
             return retList;
         }
 
@@ -87,7 +92,7 @@ namespace Settings.Net.Storage.JSON
 
         public void WriteAll(List<SettingDTO> settingsDTO)
         {
-            FileStream fs = new FileStream(_fileName, FileMode.OpenOrCreate);
+            FileStream fs = new FileStream(_fileName, FileMode.OpenOrCreate);            
             Utf8JsonWriter wrtr = new Utf8JsonWriter(fs, writerOpts);
             JsonSerializer.Serialize(wrtr, settingsDTO, typeof(List<SettingDTO>));
             fs.Flush();
