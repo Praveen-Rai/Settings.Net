@@ -60,15 +60,15 @@ namespace Settings.Net.Core
         {
             var dto = new SettingDTO();
 
-            dto.SettingTypeName = GetType().FullName;
-            dto.CollectionName = Group;
+            dto.Identifier = GetType().FullName;
+            dto.Group = Group;
             dto.ValueAssemblyFullName = ValueType.Assembly.FullName;
             dto.ValueTypeAssemblyQualifiedName = ValueType.AssemblyQualifiedName;
             dto.ValueTypeFullName = ValueType.FullName;
 
             // If value is one of the allowed types ( all built-in types or except custom classes ) then store as is
             // Else serialize as json string ( for custom classes )
-            if (ConstantValues.AllowedTypes.Contains(ValueType))
+            if (Globals.AllowedTypes.Contains(ValueType))
             {
                 dto.Value = SettingValue;
             }

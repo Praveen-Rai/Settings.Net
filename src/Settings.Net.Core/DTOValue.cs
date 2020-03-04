@@ -19,10 +19,6 @@ namespace Settings.Net.Core
             Number,
             Boolean,
             DTOValue,
-            StringArray,
-            NumberArray,
-            BooleanArray,
-            DTOValueArray,
             Undefined,
         }
 

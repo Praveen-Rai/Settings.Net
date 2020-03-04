@@ -84,7 +84,7 @@ namespace Settings.Net.Storage.JSON
 
         public void UpdateSetting(SettingDTO settingDTO)
         {
-            var dto = dtos.FirstOrDefault(x => x.SettingTypeName == settingDTO.SettingTypeName);
+            var dto = dtos.FirstOrDefault(x => x.Identifier == settingDTO.Identifier);
             dto.Value = settingDTO.Value;
 
             WriteAll(dtos);
