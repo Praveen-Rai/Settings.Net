@@ -237,6 +237,21 @@ namespace Settings.Net.Core
     *   ]
     * }
     * 
+    * Pseudo-Code to read DTOValues :
+    * 
+    * public function ReadDTOStruct(DTOStruct struct)
+    * {
+    *    Foreach( var prop in DTOStruct.Properties )
+    *    {
+    *       propName = prop.Name;
+    *       if(prop.ValueType == Struct)
+    *       {
+    *          ReadDTOStruct(prop.Value);
+    *       }
+    *    }
+    * }
+    *    
+    *  
     * Without DTOStruct, using directly List<DTOStructPorperty> to represent an object. 40 Lines
     *   [
     *     DTOStructPorperty
