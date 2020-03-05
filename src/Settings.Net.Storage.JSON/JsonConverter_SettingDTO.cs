@@ -7,7 +7,7 @@ using Settings.Net.Core;
 
 namespace Settings.Net.Storage.JSON
 {
-    class JsonConvertor_SettingDTO : JsonConverter<SettingDTO>
+    class JsonConverter_SettingDTO : JsonConverter<SettingDTO>
     {
         public override SettingDTO Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {

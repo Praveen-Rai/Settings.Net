@@ -7,14 +7,14 @@ using Settings.Net.Core;
 
 namespace Settings.Net.Storage.JSON
 {
-    class JsonConvertor_ObjectPropertiesDTO : JsonConverter<ObjectPropertiesDTO>
+    class JsonConverter_ObjectDTO : JsonConverter<ObjectDTO>
     {
-        public override ObjectPropertiesDTO Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override ObjectDTO Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }
 
-        public override void Write(Utf8JsonWriter writer, ObjectPropertiesDTO value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, ObjectDTO value, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }
