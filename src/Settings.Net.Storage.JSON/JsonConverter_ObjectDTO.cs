@@ -16,7 +16,17 @@ namespace Settings.Net.Storage.JSON
 
         public override void Write(Utf8JsonWriter writer, ObjectDTO value, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            writer.WriteStartArray();
+            var props = value.objectProperties;
+
+            var propConv = options.GetConverter(typeof(ObjectPropertiesDTO)) as JsonConverter<ObjectPropertiesDTO>;
+
+            foreach (var prop in props)
+            {
+                propConv.Write(writer, prop, options);
+            }
+
+            writer.WriteStartArray();
         }
     }
 }

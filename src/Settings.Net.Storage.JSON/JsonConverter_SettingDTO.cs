@@ -33,7 +33,10 @@ namespace Settings.Net.Storage.JSON
                 case DTOValueKind.Boolean:
                     writer.WriteBoolean("Value", (bool)value.Value);
                     break;
-                case DTOValueKind.Object:                   
+                case DTOValueKind.Object:
+                    writer.WritePropertyName("Value");
+                    var objConv = options.GetConverter(typeof(ObjectDTO)) as JsonConverter<ObjectDTO>;
+                    objConv.Write(writer, (ObjectDTO)value.Value, options);
                     break;
                 case DTOValueKind.Array:
                     break;

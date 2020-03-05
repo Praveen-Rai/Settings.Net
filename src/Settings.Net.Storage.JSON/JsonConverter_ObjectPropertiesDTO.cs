@@ -16,7 +16,35 @@ namespace Settings.Net.Storage.JSON
 
         public override void Write(Utf8JsonWriter writer, ObjectPropertiesDTO value, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            writer.WriteStartObject();
+            writer.WriteString("PropertyName", value.PropertyName);
+
+            switch (value.ValueKind)
+            {
+                case DTOValueKind.UnDefined:
+                    break;
+                case DTOValueKind.String:
+                    writer.WriteString("Value", (string)value.Value);
+                    break;
+                case DTOValueKind.Number:
+                    writer.WriteNumber("Value", (double)value.Value);
+                    // Todo : Cannot convert from int to double
+                    break;
+                case DTOValueKind.Boolean:
+                    writer.WriteBoolean("Value", (bool)value.Value);
+                    break;
+                case DTOValueKind.Object:
+                    writer.WritePropertyName("Value");
+                    var objConv = options.GetConverter(typeof(ObjectDTO)) as JsonConverter<ObjectDTO>;
+                    objConv.Write(writer, (ObjectDTO)value.Value, options);
+                    break;
+                case DTOValueKind.Array:
+                    break;
+                default:
+                    break;
+            }
+
+            writer.WriteEndObject();
         }
     }
 }
