@@ -7,6 +7,6 @@ namespace Settings.Net.Core
 
     public class ObjectDTO
     {
-        ObjectPropertiesDTO[] objectProperties { get; set; }
+        public ObjectPropertiesDTO[] objectProperties { get; set; }
     }
 }

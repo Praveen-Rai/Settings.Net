@@ -50,47 +50,6 @@ namespace Settings.Net.Core
         /// The value that the setting holds
         /// </summary>
         public abstract Type ValueType { get; }
-
-        /// <summary>
-        /// Tranforms the objects into a DTO, which can be consumed by Storage
-        /// </summary>
-        /// <returns>Return a DTO</returns>
-        /// <remarks>All the tranformations required for the storage are to be done here. We might want to move this function to Settings Manager</remarks>
-        public SettingDTO GenerateDTO()
-        {
-            var dto = new SettingDTO();
-
-            dto.Identifier = GetType().FullName;
-            dto.Group = Group;
-            dto.ValueAssemblyFullName = ValueType.Assembly.FullName;
-            dto.ValueTypeAssemblyQualifiedName = ValueType.AssemblyQualifiedName;
-            dto.ValueTypeFullName = ValueType.FullName;
-
-            // If value is one of the allowed types ( all built-in types or except custom classes ) then store as is
-            // Else serialize as json string ( for custom classes )
-            if (Globals.AllowedTypes.Contains(ValueType))
-            {
-                dto.Value = SettingValue;
-            }
-            else
-            {
-                // Todo: JsonSerializer serializes enums to integer, Though its Deserialize method is able to generate back the selected enum member with that integer.
-                // But Enum.Parse() method needs member name, which is the constant that a code depends upon mostly. 
-                // Enum member value is suspected to be changed, and moreover isn't expressive when seen in config file.
-                // We need to write code to go through the nested types and convert all enums used to their string representations.
-                // Note: JsonSerializer will only serialize public properties and not fields.
-                dto.Value = JsonSerializer.Serialize(SettingValue);
-
-                string v = (string)dto.Value;
-                Type t = Type.GetType(dto.ValueTypeAssemblyQualifiedName);
-
-                var o = JsonSerializer.Deserialize(v, t);
-
-            }
-
-            return dto;
-
-        }
         
         public bool Equals([AllowNull] SettingBase setting)
         {

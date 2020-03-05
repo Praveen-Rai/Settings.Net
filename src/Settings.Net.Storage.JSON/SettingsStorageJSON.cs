@@ -1,6 +1,11 @@
 ﻿// Copyright (c) 2020 Praveen Rai
 // This code is licensed under MIT license (see LICENSE.txt for details)
 
+/* Notes:
+ * Todo : The dto must not be serialized to json. ValueKind, ObjectProperties, these fields does not make sense in the json file.
+ * 
+ */
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -22,9 +27,19 @@ namespace Settings.Net.Storage.JSON
 
         private string _fileName = "";
 
-        private JsonWriterOptions writerOpts = new JsonWriterOptions() { Indented = true} ;
+        private JsonWriterOptions writerOpts = new JsonWriterOptions() { Indented = true };
+
+        private JsonSerializerOptions serializeOptions;
 
         private List<SettingDTO> dtos = new List<SettingDTO>();
+
+        public SettingsStorageJSON()
+        {
+            serializeOptions = new JsonSerializerOptions();
+            serializeOptions.Converters.Add(new JsonConvertor_SettingDTO());
+            serializeOptions.Converters.Add(new JsonConvertor_ObjectDTO());
+            serializeOptions.Converters.Add(new JsonConvertor_ObjectPropertiesDTO());
+        }
 
         public void AddSetting(SettingDTO settingDTO)
         {
@@ -69,15 +84,16 @@ namespace Settings.Net.Storage.JSON
             ReadOnlySpan<byte> jsonReadOnlySpan = File.ReadAllBytes(_fileName);
 
             // If file is empty
-            if(jsonReadOnlySpan.Length == 0)
+            if (jsonReadOnlySpan.Length == 0)
             {
                 return new List<SettingDTO>();
             }
 
             Utf8JsonReader rdr = new Utf8JsonReader(jsonReadOnlySpan);
-            
-            var retList = (List<SettingDTO>)JsonSerializer.Deserialize(ref rdr, typeof(List<SettingDTO>));
+
+            var retList = (List<SettingDTO>)JsonSerializer.Deserialize(ref rdr, typeof(List<SettingDTO>), serializeOptions);
             // Todo : The complex type values are returned as JsonElemnt (string). Need to convert it into the required type before returing.
+            // We must write a convertor to map objects to ObjectDTO, ObjectPropertiesDTO
             // https://docs.microsoft.com/en-us/dotnet/api/system.type?view=netframework-4.8#what-types-does-a-type-object-represent
             return retList;
         }
@@ -92,9 +108,9 @@ namespace Settings.Net.Storage.JSON
 
         public void WriteAll(List<SettingDTO> settingsDTO)
         {
-            FileStream fs = new FileStream(_fileName, FileMode.OpenOrCreate);            
+            FileStream fs = new FileStream(_fileName, FileMode.OpenOrCreate);
             Utf8JsonWriter wrtr = new Utf8JsonWriter(fs, writerOpts);
-            JsonSerializer.Serialize(wrtr, settingsDTO, typeof(List<SettingDTO>));
+            JsonSerializer.Serialize(wrtr, settingsDTO, typeof(List<SettingDTO>), serializeOptions);
             fs.Flush();
             fs.Close();
         }

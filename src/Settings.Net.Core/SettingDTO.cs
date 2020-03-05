@@ -42,7 +42,7 @@ namespace Settings.Net.Core
         /// <summary>
         /// Full type name of the value this setting holds.
         /// </summary>
-        public DTOValueKind ValueKind { get; }
+        public DTOValueKind ValueKind { get; set; }
 
         /// <summary>
         /// Current value of the setting

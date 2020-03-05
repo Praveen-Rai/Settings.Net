@@ -31,7 +31,6 @@ namespace Settings.Net.Core
             { typeof(long).FullName, DTOValueKind.Number },
             { typeof(ulong).FullName, DTOValueKind.Number },
             { typeof(short).FullName, DTOValueKind.Number },
-            { typeof(string).FullName, DTOValueKind.Number },
             { typeof(float).FullName, DTOValueKind.Number },
             { typeof(double).FullName, DTOValueKind.Number },
             { typeof(decimal).FullName, DTOValueKind.Number },

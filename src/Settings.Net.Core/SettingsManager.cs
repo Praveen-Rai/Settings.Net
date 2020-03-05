@@ -27,6 +27,8 @@ namespace Settings.Net.Core
         /// </summary>
         private static ISettingsStorage _storage;
 
+        private SettingDTOGenerator dtoParser = new SettingDTOGenerator();
+
         #endregion
 
         #region Constructors
@@ -83,7 +85,7 @@ namespace Settings.Net.Core
 
                 if(storage.ReadAll().Count > 0)
                 {
-                    mgr.ReadValuesFromDTOs(storage.ReadAll());
+                    mgr.CopyValuesFromDtos(storage.ReadAll());
                 }
                 
             }
@@ -146,9 +148,10 @@ namespace Settings.Net.Core
 
             var dtos = new List<SettingDTO>();
 
-            foreach (var coll in _settings)
+            foreach (var settingObj in _settings)
             {
-                dtos.Add(coll.GenerateDTO());
+                var settingDto = dtoParser.GenerateDTOForSetting(settingObj);
+                dtos.Add(settingDto);
             }
 
             _storage.WriteAll(dtos);
@@ -168,21 +171,18 @@ namespace Settings.Net.Core
         /// </summary>
         /// <param name="settingDTOs"></param>
         /// <returns></returns>
-        private void ReadValuesFromDTOs(List<SettingDTO> settingDTOs)
+        private void CopyValuesFromDtos(List<SettingDTO> settingDTOs)
         {
             // Assumption the _settingsCollections is already populated before calling this function
             // Which is logical
 
             var Collection = new List<SettingDTO>();
 
-            foreach (var dto in settingDTOs)
+            foreach (var setting in _settings)
             {
-                var setting = _settings.FirstOrDefault(x => x.SettingType.FullName == dto.Identifier);
-                var valType = Type.GetType(dto.ValueTypeAssemblyQualifiedName);
+                var dto = settingDTOs.FirstOrDefault(x => x.Identifier == setting.SettingType.FullName);
                 setting.SettingValue = dto.Value;
-
             }
-
         }
 
         /// <summary>
