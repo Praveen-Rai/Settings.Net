@@ -111,6 +111,14 @@ namespace Settings.Net.Core
             var valueTypeName = valueType.FullName;
             var map = Globals.PrimitiveMappings.FirstOrDefault(x => x.Key == valueTypeName);
 
+
+            // Numbers represents a 64-bit floating point number, which seems to be the widely accepted convention. 
+            // Hence convert all numbers to double
+            if(map.Value == DTOValueKind.Number)
+            {
+                return( map.Value, Convert.ToDouble(value));
+            }
+
             if (map.Key == "") { throw new InvalidCastException("Type not supported : " + valueTypeName); }
             else
             {

@@ -83,11 +83,11 @@ namespace Settings.Net.Core
             if (storage.IsReady())
             {
 
-                if(storage.ReadAll().Count > 0)
+                if (storage.ReadAll().Count > 0)
                 {
                     mgr.CopyValuesFromDtos(storage.ReadAll());
                 }
-                
+
             }
 
             return mgr;
@@ -123,11 +123,11 @@ namespace Settings.Net.Core
         {
             var valRes = setting.Validate();
 
-            if(valRes.Result == ValidationResult.ResultType.Passed || valRes.Result == ValidationResult.ResultType.Warning)
+            if (valRes.Result == ValidationResult.ResultType.Passed || valRes.Result == ValidationResult.ResultType.Warning)
             {
                 var x = _settings.FirstOrDefault(x => x.SettingType == setting.SettingType);
 
-                if( x!= null)
+                if (x != null)
                 {
                     _settings.Remove(x);
                     _settings.Add(setting);
@@ -181,7 +181,32 @@ namespace Settings.Net.Core
             foreach (var setting in _settings)
             {
                 var dto = settingDTOs.FirstOrDefault(x => x.Identifier == setting.SettingType.FullName);
-                setting.SettingValue = dto.Value;
+                // Todo : Cannot convert from ObjectDTO to SampleClass.
+                // In case of nested objects, we needs to implement the functionality to convert them back to the custom type.
+                if (dto.ValueKind == DTOValueKind.String || dto.ValueKind == DTOValueKind.Number || dto.ValueKind == DTOValueKind.Boolean)
+                {
+                    setting.SettingValue = dto.Value;
+                }
+                else if (dto.ValueKind == DTOValueKind.Object)
+                {
+                    var valObj = Activator.CreateInstance(setting.ValueType);
+                    var valObjProps = setting.ValueType.GetProperties();
+                    var objDto = (ObjectDTO)dto.Value;
+
+                    foreach (var prop in valObjProps)
+                    {
+                        // Todo : If property type is simple number, string or bool, just copy the value.
+                        var objPropDto = objDto.objectProperties.FirstOrDefault(x => x.PropertyName == prop.Name);
+                        if(objPropDto!= null)
+                        {
+                            // Todo : If property type is a custom type, we first need to create an instance of the type an do the process re-cursively.
+                            // Now it makes sense to have all these functionalites in SettingsDTOGenerator. Since, here too we need to work with DTOKinds, ObjectKind etc.
+                            prop.SetValue(valObj, objPropDto.Value);
+                        }
+                    }
+
+                }
+
             }
         }
 

@@ -11,30 +11,71 @@ namespace Settings.Net.Storage.JSON
     {
         public override ObjectPropertiesDTO Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            var objPropDTO = new ObjectPropertiesDTO();
+            if (reader.TokenType == JsonTokenType.PropertyName)
+            {
+                objPropDTO.PropertyName = reader.GetString();
+
+                reader.Read();
+
+                switch (reader.TokenType)
+                {
+                    case JsonTokenType.None:
+                        break;
+                    case JsonTokenType.StartObject:
+                        var objConv = options.GetConverter(typeof(ObjectDTO)) as JsonConverter<ObjectDTO>;
+                        objPropDTO.Value = objConv.Read(ref reader, typeof(ObjectDTO), options);
+                        break;
+                    case JsonTokenType.EndObject:
+                        break;
+                    case JsonTokenType.StartArray:
+                        break;
+                    case JsonTokenType.EndArray:
+                        break;
+                    case JsonTokenType.PropertyName:
+                        break;
+                    case JsonTokenType.Comment:
+                        break;
+                    case JsonTokenType.String:
+                        objPropDTO.Value = reader.GetString();
+                        break;
+                    case JsonTokenType.Number:
+                        objPropDTO.Value = reader.GetDouble();
+                        break;
+                    case JsonTokenType.True:
+                        objPropDTO.Value = reader.GetBoolean();
+                        break;
+                    case JsonTokenType.False:
+                        objPropDTO.Value = reader.GetBoolean();
+                        break;
+                    case JsonTokenType.Null:
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return objPropDTO;
         }
 
         public override void Write(Utf8JsonWriter writer, ObjectPropertiesDTO value, JsonSerializerOptions options)
         {
-            writer.WriteStartObject();
-            writer.WriteString("PropertyName", value.PropertyName);
-
             switch (value.ValueKind)
             {
                 case DTOValueKind.UnDefined:
                     break;
                 case DTOValueKind.String:
-                    writer.WriteString("Value", (string)value.Value);
+                    writer.WriteString(value.PropertyName, (string)value.Value);
                     break;
                 case DTOValueKind.Number:
-                    writer.WriteNumber("Value", (double)value.Value);
+                    writer.WriteNumber(value.PropertyName, (double)value.Value);
                     // Todo : Cannot convert from int to double
                     break;
                 case DTOValueKind.Boolean:
-                    writer.WriteBoolean("Value", (bool)value.Value);
+                    writer.WriteBoolean(value.PropertyName, (bool)value.Value);
                     break;
                 case DTOValueKind.Object:
-                    writer.WritePropertyName("Value");
+                    writer.WritePropertyName(value.PropertyName);
                     var objConv = options.GetConverter(typeof(ObjectDTO)) as JsonConverter<ObjectDTO>;
                     objConv.Write(writer, (ObjectDTO)value.Value, options);
                     break;
@@ -43,8 +84,6 @@ namespace Settings.Net.Storage.JSON
                 default:
                     break;
             }
-
-            writer.WriteEndObject();
         }
     }
 }

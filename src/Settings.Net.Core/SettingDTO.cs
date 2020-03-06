@@ -17,7 +17,7 @@ namespace Settings.Net.Core
     {
         UnDefined,
         String,
-        Number,
+        Number,   // all numbers are converted to double (64-bit floating number), since that seems appears to be the widely accepted format acc. IEEE 754. https://tools.ietf.org/html/rfc8259#page-7
         Boolean,
         Object,
         Array,

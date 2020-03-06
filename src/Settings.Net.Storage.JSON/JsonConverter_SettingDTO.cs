@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Settings.Net.Core;
+using System.Linq;
 
 namespace Settings.Net.Storage.JSON
 {
@@ -11,7 +12,69 @@ namespace Settings.Net.Storage.JSON
     {
         public override SettingDTO Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            var dtoObj = new SettingDTO();
+
+            var continueLoop = true;
+            do
+            {
+                reader.Read();
+                switch (reader.TokenType)
+                {
+
+                    case JsonTokenType.PropertyName:
+                        var propName = reader.GetString();
+                        reader.Read();
+
+                        switch (propName)
+                        {
+                            case nameof(dtoObj.Identifier):
+                                dtoObj.Identifier = reader.GetString();
+                                break;
+                            case nameof(dtoObj.Group):
+                                dtoObj.Group = reader.GetString();
+                                break;
+                            case nameof(dtoObj.Value):
+                                switch (reader.TokenType)
+                                {
+
+                                    case JsonTokenType.String:
+                                        dtoObj.Value = reader.GetString();
+                                        break;
+                                    case JsonTokenType.Number:
+                                        dtoObj.Value = reader.GetDouble();
+                                        break;
+                                    case JsonTokenType.True:
+                                        dtoObj.Value = reader.GetBoolean();
+                                        break;
+                                    case JsonTokenType.False:
+                                        dtoObj.Value = reader.GetBoolean();
+                                        break;
+                                    case JsonTokenType.StartObject:
+                                        var objConv = options.GetConverter(typeof(ObjectDTO)) as JsonConverter<ObjectDTO>;
+                                        var objDTO = objConv.Read(ref reader, typeof(ObjectDTO), options);
+                                        dtoObj.Value = objDTO;
+                                        break;
+
+                                    default:
+                                        break;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+
+                        break;
+                    case JsonTokenType.EndObject:
+                        continueLoop = false;
+                        break;
+                    default:
+                        break;
+                }
+
+            } while (continueLoop);
+
+
+            return dtoObj;
         }
 
         public override void Write(Utf8JsonWriter writer, SettingDTO value, JsonSerializerOptions options)
@@ -25,7 +88,7 @@ namespace Settings.Net.Storage.JSON
                 case DTOValueKind.UnDefined:
                     break;
                 case DTOValueKind.String:
-                    writer.WriteString( "Value", (string)value.Value);
+                    writer.WriteString("Value", (string)value.Value);
                     break;
                 case DTOValueKind.Number:
                     writer.WriteNumber("Value", (double)value.Value);
@@ -46,5 +109,6 @@ namespace Settings.Net.Storage.JSON
 
             writer.WriteEndObject();
         }
+
     }
 }

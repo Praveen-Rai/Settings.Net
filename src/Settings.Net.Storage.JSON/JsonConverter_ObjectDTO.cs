@@ -11,12 +11,43 @@ namespace Settings.Net.Storage.JSON
     {
         public override ObjectDTO Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            var objDTO = new ObjectDTO();
+            var objPropsList = new List<ObjectPropertiesDTO>();
+
+            var continueLoop = true;
+            
+            do
+            {
+                reader.Read();
+
+                switch (reader.TokenType)
+                {
+                    case JsonTokenType.StartObject:
+                        continueLoop = false;
+                        break;
+                    case JsonTokenType.EndObject:
+                        continueLoop = false;
+                        break;
+                    case JsonTokenType.PropertyName:
+                        var propConv = options.GetConverter(typeof(ObjectPropertiesDTO)) as JsonConverter<ObjectPropertiesDTO>;
+                         var objPropDTO = propConv.Read(ref reader, typeof(ObjectPropertiesDTO), options);
+                        objPropsList.Add(objPropDTO);
+                        break;
+                        
+                    default:
+                        break;
+                }                
+
+            } while (continueLoop);
+
+            objDTO.objectProperties = objPropsList.ToArray();
+
+            return objDTO;
         }
 
         public override void Write(Utf8JsonWriter writer, ObjectDTO value, JsonSerializerOptions options)
         {
-            writer.WriteStartArray();
+            writer.WriteStartObject();
             var props = value.objectProperties;
 
             var propConv = options.GetConverter(typeof(ObjectPropertiesDTO)) as JsonConverter<ObjectPropertiesDTO>;
@@ -26,7 +57,7 @@ namespace Settings.Net.Storage.JSON
                 propConv.Write(writer, prop, options);
             }
 
-            writer.WriteStartArray();
+            writer.WriteEndObject();
         }
     }
 }
