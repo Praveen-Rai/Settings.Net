@@ -27,7 +27,7 @@ namespace Settings.Net.Core
         /// </summary>
         private static ISettingsStorage _storage;
 
-        private static SettingDTOGenerator dtoParser = new SettingDTOGenerator();
+        private static SettingDTOParser dtoParser = new SettingDTOParser();
 
         #endregion
 
