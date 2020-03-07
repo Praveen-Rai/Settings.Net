@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="internals\" />
+    <Compile Remove="internals\**" />
+    <EmbeddedResource Remove="internals\**" />
+    <None Remove="internals\**" />
   </ItemGroup>
 
 </Project>
