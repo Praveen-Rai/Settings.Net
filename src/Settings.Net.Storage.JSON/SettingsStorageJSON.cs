@@ -1,11 +1,6 @@
 ﻿// Copyright (c) 2020 Praveen Rai
 // This code is licensed under MIT license (see LICENSE.txt for details)
 
-/* Notes:
- * Todo : The dto must not be serialized to json. ValueKind, ObjectProperties, these fields does not make sense in the json file.
- * 
- */
-
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -92,9 +87,6 @@ namespace Settings.Net.Storage.JSON
             Utf8JsonReader rdr = new Utf8JsonReader(jsonReadOnlySpan);
 
             var retList = (List<SettingDTO>)JsonSerializer.Deserialize(ref rdr, typeof(List<SettingDTO>), serializeOptions);
-            // Todo : The complex type values are returned as JsonElemnt (string). Need to convert it into the required type before returing.
-            // We must write a convertor to map objects to ObjectDTO, ObjectPropertiesDTO
-            // https://docs.microsoft.com/en-us/dotnet/api/system.type?view=netframework-4.8#what-types-does-a-type-object-represent
             return retList;
         }
 

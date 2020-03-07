@@ -74,7 +74,6 @@ namespace Settings.Net.Storage.JSON
                     break;
                 case DTOValueKind.Number:
                     writer.WriteNumber(value.PropertyName, (double)value.Value);
-                    // Todo : Cannot convert from int to double
                     break;
                 case DTOValueKind.Boolean:
                     writer.WriteBoolean(value.PropertyName, (bool)value.Value);

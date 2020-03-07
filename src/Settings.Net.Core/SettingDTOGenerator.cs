@@ -80,7 +80,7 @@ namespace Settings.Net.Core
             switch (settingDTO.ValueKind)
             {
                 case DTOValueKind.UnDefined:
-                    // Todo : For class Struct also the value comes undefined.
+                    // Idea : Do we need Undefined at all. GenericSetting<T> always is typed. What can UnDefined by used for ?
                     // This evaluation is performed by Storage.ReadAll(). 
                     // Two action points here. Match the setting.ValueType against the settingDTO.ValueType, ie. ObjectKind & DTOValueKind. May be we must simplify this concept of two kinds
                     // Secondly, we must always be prefering setting.ValueType, since storage is an external library. There could be problems in their implementations. We need to catch them here.
