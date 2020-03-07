@@ -50,6 +50,127 @@ namespace Settings.Net.Core
             return dto;
         }
 
+        public void CopySettingValuesFromDTO(List<SettingBase> settingCollection, List<SettingDTO> settingDTOCollection)
+        {
+
+            for (int i = 0; i < settingCollection.Count; i++)
+            {
+                var setting = settingCollection[i];
+
+                // Get the dto for a setting
+                var dtoObj = settingDTOCollection.FirstOrDefault(x => x.Identifier == setting.SettingType.FullName);
+
+                // copy values if not null
+                if (dtoObj != null)
+                {
+                    CopySettingValueFromDTO(ref setting, dtoObj);
+                }
+                else
+                {
+                    // Do nothing. Assuming settingDto already has a default value assigned by its constructor.
+                }
+            }
+
+        }
+
+        private void CopySettingValueFromDTO(ref SettingBase setting, SettingDTO settingDTO)
+        {
+            var settingObjKind = GetObjectKind(setting.SettingType);
+
+            switch (settingDTO.ValueKind)
+            {
+                case DTOValueKind.UnDefined:
+                    // Todo : For class Struct also the value comes undefined.
+                    // This evaluation is performed by Storage.ReadAll(). 
+                    // Two action points here. Match the setting.ValueType against the settingDTO.ValueType, ie. ObjectKind & DTOValueKind. May be we must simplify this concept of two kinds
+                    // Secondly, we must always be prefering setting.ValueType, since storage is an external library. There could be problems in their implementations. We need to catch them here.
+                    break;
+                case DTOValueKind.String:
+
+                    switch (settingObjKind)
+                    {
+                        case ObjectKind.Primitive:
+                            setting.SettingValue = (string)settingDTO.Value;
+                            break;
+                        case ObjectKind.Enum:
+                            setting.SettingValue = Enum.Parse(setting.ValueType, (string)settingDTO.Value);
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case DTOValueKind.Number:
+                    var dtoValueConverted = Convert.ChangeType(settingDTO.Value, setting.ValueType);
+                    setting.SettingValue = dtoValueConverted;
+                    break;
+                case DTOValueKind.Boolean:
+                    setting.SettingValue = (bool)settingDTO.Value;
+                    break;
+                case DTOValueKind.Object:
+                    var valObj = CreateObjectFromObjectDTO(setting.ValueType, (ObjectDTO)settingDTO.Value);
+                    setting.SettingValue = valObj;
+                    break;
+                case DTOValueKind.Array:
+                    // Todo : array in general is not implemented yet, anywhere.
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private object CreateObjectFromObjectDTO(Type objectType, ObjectDTO objectDTO)
+        {
+            var obj = Activator.CreateInstance(objectType);
+            var objTypeProps = objectType.GetProperties();
+
+            foreach (var prop in objTypeProps)
+            {
+                var propObjKind = GetObjectKind(prop.PropertyType);
+
+                var propDto = objectDTO.objectProperties.FirstOrDefault(x => x.PropertyName == prop.Name);
+
+                if (propDto != null)
+                {
+                    switch (propDto.ValueKind)
+                    {
+                        case DTOValueKind.UnDefined:
+                            break;
+                        case DTOValueKind.String:
+                            switch (propObjKind)
+                            {
+                                case ObjectKind.Primitive:
+                                    prop.SetValue(obj, (string)propDto.Value);
+                                    break;
+                                case ObjectKind.Enum:
+                                    prop.SetValue(obj, Enum.Parse(prop.PropertyType, (string)propDto.Value));
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        case DTOValueKind.Number:
+                            var dtoValueConverted = Convert.ChangeType(propDto.Value, prop.PropertyType);
+                            prop.SetValue(obj, dtoValueConverted);
+                            break;
+                        case DTOValueKind.Boolean:
+                            prop.SetValue(obj, (bool)propDto.Value);
+                            break;
+                        case DTOValueKind.Object:
+                            var proObj = CreateObjectFromObjectDTO(prop.PropertyType, (ObjectDTO)propDto.Value);
+                            prop.SetValue(obj, proObj);
+                            break;
+                        case DTOValueKind.Array:
+                            // Todo : Arrays are not implemented yet.
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            return obj;
+        }
+
         /// <summary>
         /// Parse a given object & its value to a dto compatible object
         /// </summary>
@@ -114,9 +235,9 @@ namespace Settings.Net.Core
 
             // Numbers represents a 64-bit floating point number, which seems to be the widely accepted convention. 
             // Hence convert all numbers to double
-            if(map.Value == DTOValueKind.Number)
+            if (map.Value == DTOValueKind.Number)
             {
-                return( map.Value, Convert.ToDouble(value));
+                return (map.Value, Convert.ToDouble(value));
             }
 
             if (map.Key == "") { throw new InvalidCastException("Type not supported : " + valueTypeName); }
@@ -168,5 +289,6 @@ namespace Settings.Net.Core
 
             return (DTOValueKind.Object, obj);
         }
+
     }
 }

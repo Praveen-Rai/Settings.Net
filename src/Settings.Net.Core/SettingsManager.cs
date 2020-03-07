@@ -27,7 +27,7 @@ namespace Settings.Net.Core
         /// </summary>
         private static ISettingsStorage _storage;
 
-        private SettingDTOGenerator dtoParser = new SettingDTOGenerator();
+        private static SettingDTOGenerator dtoParser = new SettingDTOGenerator();
 
         #endregion
 
@@ -85,7 +85,9 @@ namespace Settings.Net.Core
 
                 if (storage.ReadAll().Count > 0)
                 {
-                    mgr.CopyValuesFromDtos(storage.ReadAll());
+                    //mgr.CopyValuesFromDtos(storage.ReadAll());
+
+                    dtoParser.CopySettingValuesFromDTO(_settings, storage.ReadAll());
                 }
 
             }

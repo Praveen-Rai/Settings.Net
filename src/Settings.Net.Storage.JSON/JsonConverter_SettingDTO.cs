@@ -38,21 +38,26 @@ namespace Settings.Net.Storage.JSON
                                 {
 
                                     case JsonTokenType.String:
+                                        dtoObj.ValueKind = DTOValueKind.String;
                                         dtoObj.Value = reader.GetString();
                                         break;
                                     case JsonTokenType.Number:
+                                        dtoObj.ValueKind = DTOValueKind.Number;
                                         dtoObj.Value = reader.GetDouble();
                                         break;
                                     case JsonTokenType.True:
+                                        dtoObj.ValueKind = DTOValueKind.Boolean;
                                         dtoObj.Value = reader.GetBoolean();
                                         break;
                                     case JsonTokenType.False:
+                                        dtoObj.ValueKind = DTOValueKind.Boolean;
                                         dtoObj.Value = reader.GetBoolean();
                                         break;
                                     case JsonTokenType.StartObject:
+                                        dtoObj.ValueKind = DTOValueKind.Object;
                                         var objConv = options.GetConverter(typeof(ObjectDTO)) as JsonConverter<ObjectDTO>;
                                         var objDTO = objConv.Read(ref reader, typeof(ObjectDTO), options);
-                                        dtoObj.Value = objDTO;
+                                        dtoObj.Value = objDTO;                                        
                                         break;
 
                                     default:

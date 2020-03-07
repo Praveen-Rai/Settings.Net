@@ -25,6 +25,7 @@ namespace Settings.Net.Storage.JSON
                     case JsonTokenType.StartObject:
                         var objConv = options.GetConverter(typeof(ObjectDTO)) as JsonConverter<ObjectDTO>;
                         objPropDTO.Value = objConv.Read(ref reader, typeof(ObjectDTO), options);
+                        objPropDTO.ValueKind = DTOValueKind.Object;
                         break;
                     case JsonTokenType.EndObject:
                         break;
@@ -37,15 +38,19 @@ namespace Settings.Net.Storage.JSON
                     case JsonTokenType.Comment:
                         break;
                     case JsonTokenType.String:
+                        objPropDTO.ValueKind = DTOValueKind.String;
                         objPropDTO.Value = reader.GetString();
                         break;
                     case JsonTokenType.Number:
+                        objPropDTO.ValueKind = DTOValueKind.Number;
                         objPropDTO.Value = reader.GetDouble();
                         break;
                     case JsonTokenType.True:
+                        objPropDTO.ValueKind = DTOValueKind.Boolean;
                         objPropDTO.Value = reader.GetBoolean();
                         break;
                     case JsonTokenType.False:
+                        objPropDTO.ValueKind = DTOValueKind.Boolean;
                         objPropDTO.Value = reader.GetBoolean();
                         break;
                     case JsonTokenType.Null:
