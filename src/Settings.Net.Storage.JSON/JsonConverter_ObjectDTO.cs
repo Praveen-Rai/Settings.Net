@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Settings.Net.Core;
+using Settings.Net.Core.DTOs;
 
 namespace Settings.Net.Storage.JSON
 {

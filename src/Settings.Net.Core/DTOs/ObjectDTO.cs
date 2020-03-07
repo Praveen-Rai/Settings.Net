@@ -5,9 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Settings.Net.Core
+namespace Settings.Net.Core.DTOs
 {
-
     public class ObjectDTO
     {
         public ObjectPropertiesDTO[] objectProperties { get; set; }

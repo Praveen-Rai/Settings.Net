@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
 using System.Linq;
-
+using Settings.Net.Core.DTOs;
 
 namespace Settings.Net.Core
 {

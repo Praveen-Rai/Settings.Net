@@ -8,6 +8,7 @@ using Settings.Net.Core;
 using System.IO;
 using System.Text.Json;
 using System.Linq;
+using Settings.Net.Core.DTOs;
 
 namespace Settings.Net.Storage.JSON
 {
