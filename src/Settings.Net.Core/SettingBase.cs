@@ -34,7 +34,7 @@ namespace Settings.Net.Core
         /// The validator method to perform validations of the current setting value
         /// </summary>
         /// <returns></returns>
-        public virtual ValidationResult Validate() { return new ValidationResult() { Result = ValidationResult.ResultType.Passed, Message = "" }; }
+        public virtual ValidationResult Validate(List<SettingBase> settings) { return new ValidationResult() { Result = ValidationResult.ResultType.Passed, Message = "Passed since no validations are added." }; }
 
         /// <summary>
         /// The type of the setting

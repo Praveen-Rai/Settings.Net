@@ -123,7 +123,7 @@ namespace Settings.Net.Core
 
         public ValidationResult UpdateSetting(SettingBase setting)
         {
-            var valRes = setting.Validate();
+            var valRes = setting.Validate(_settings);
 
             if (valRes.Result == ValidationResult.ResultType.Passed || valRes.Result == ValidationResult.ResultType.Warning)
             {
@@ -131,6 +131,7 @@ namespace Settings.Net.Core
 
                 if (x != null)
                 {
+                    // Replacing the setting value, using remove and add. Since list is a ref type, a better approach might be possible. Todo:
                     _settings.Remove(x);
                     _settings.Add(setting);
                 }
@@ -142,8 +143,6 @@ namespace Settings.Net.Core
 
             return valRes;
         }
-
-
 
         public void Save()
         {
@@ -237,7 +236,7 @@ namespace Settings.Net.Core
 
             foreach (var setting in _settings)
             {
-                var res = setting.Validate();
+                var res = setting.Validate(_settings);
                 validationResults.Add(res);
             }
 

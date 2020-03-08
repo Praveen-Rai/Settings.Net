@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Settings.Net.Core;
+using System.Linq;
 
 namespace TestPlugin
 {
@@ -59,6 +60,30 @@ namespace TestPlugin
         public override string Description => "This is a custom Enum setting";
 
         public override SampleEnum Value { get; set; } = SampleEnum.Value2;
+
+        public override ValidationResult Validate(List<SettingBase> settings)
+        {
+
+            var sampleIntSetting = settings.FirstOrDefault(x => x.SettingType == typeof(SampleIntSetting));
+
+            if (sampleIntSetting != null)
+            {
+                if ((int)sampleIntSetting.SettingValue == 25 && Value == SampleEnum.Value1)
+                {
+                    return new ValidationResult() { Result = ValidationResult.ResultType.Error, Message = "Bad combination SampleIntSetting=25 & SampleCustomEnumSetting=SampleEnum.Value1" };
+                }
+                else
+                {
+                    return new ValidationResult() { Result = ValidationResult.ResultType.Passed, Message = "" };
+                }
+            }
+            else
+            {
+                return new ValidationResult() { Result = ValidationResult.ResultType.Passed, };
+            }
+
+            return base.Validate(settings);
+        }
 
     }
 
