@@ -79,7 +79,7 @@ namespace Settings.Net.Core
 
         private void CopySettingValueFromDTO(ref SettingBase setting, SettingDTO settingDTO)
         {
-            var settingObjKind = GetObjectKind(setting.SettingType);
+            var settingObjKind = GetObjectKind(setting.ValueType);
 
             switch (settingDTO.ValueKind)
             {
@@ -97,7 +97,16 @@ namespace Settings.Net.Core
                             setting.SettingValue = (string)settingDTO.Value;
                             break;
                         case ObjectKind.Enum:
-                            setting.SettingValue = Enum.Parse(setting.ValueType, (string)settingDTO.Value);
+
+                            var enumMemberName = (string)settingDTO.Value;
+                            var trimmedMemberName = enumMemberName;
+                            // Incase if the enum member full name is being stored. 
+                            // Refer ParseEnumValue() function. The enums are passed as string to the storage.
+                            if (enumMemberName.Contains('.'))
+                            {
+                                trimmedMemberName = enumMemberName.Split('.').Last();
+                            }
+                            setting.SettingValue = Enum.Parse(setting.ValueType, trimmedMemberName);
                             break;
                         default:
                             break;
