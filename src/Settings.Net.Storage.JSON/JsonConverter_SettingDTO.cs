@@ -59,8 +59,8 @@ namespace Settings.Net.Storage.JSON
                                         break;
                                     case JsonTokenType.StartObject:
                                         dtoObj.ValueKind = DTOValueKind.Object;
-                                        var objConv = options.GetConverter(typeof(ObjectDTO)) as JsonConverter<ObjectDTO>;
-                                        var objDTO = objConv.Read(ref reader, typeof(ObjectDTO), options);
+                                        //var objConv = options.GetConverter(typeof(ObjectDTO)) as JsonConverter<ObjectDTO>;
+                                        var objDTO = ReadObjectDTO(ref reader, typeof(ObjectDTO));
                                         dtoObj.Value = objDTO;                                        
                                         break;
 
@@ -86,6 +86,95 @@ namespace Settings.Net.Storage.JSON
             return dtoObj;
         }
 
+        private ObjectDTO ReadObjectDTO(ref Utf8JsonReader reader, Type typeToConvert)
+        {
+            var objDTO = new ObjectDTO();
+            var objPropsList = new List<ObjectPropertiesDTO>();
+
+            var continueLoop = true;
+
+            do
+            {
+                reader.Read();
+
+                switch (reader.TokenType)
+                {
+                    case JsonTokenType.StartObject:
+                        continueLoop = false;
+                        break;
+                    case JsonTokenType.EndObject:
+                        continueLoop = false;
+                        break;
+                    case JsonTokenType.PropertyName:                        
+                        var objPropDTO = ReadObjectPropertyDTO(ref reader, typeof(ObjectPropertiesDTO));
+                        objPropsList.Add(objPropDTO);
+                        break;
+
+                    default:
+                        break;
+                }
+
+            } while (continueLoop);
+
+            objDTO.objectProperties = objPropsList.ToArray();
+
+            return objDTO;
+        }
+
+        private ObjectPropertiesDTO ReadObjectPropertyDTO(ref Utf8JsonReader reader, Type typeToConvert)
+        {
+            var objPropDTO = new ObjectPropertiesDTO();
+            if (reader.TokenType == JsonTokenType.PropertyName)
+            {
+                objPropDTO.PropertyName = reader.GetString();
+
+                reader.Read();
+
+                switch (reader.TokenType)
+                {
+                    case JsonTokenType.None:
+                        break;
+                    case JsonTokenType.StartObject:
+                        //var objConv = options.GetConverter(typeof(ObjectDTO)) as JsonConverter<ObjectDTO>;
+                        objPropDTO.Value = ReadObjectDTO(ref reader, typeof(ObjectDTO));
+                        objPropDTO.ValueKind = DTOValueKind.Object;
+                        break;
+                    case JsonTokenType.EndObject:
+                        break;
+                    case JsonTokenType.StartArray:
+                        break;
+                    case JsonTokenType.EndArray:
+                        break;
+                    case JsonTokenType.PropertyName:
+                        break;
+                    case JsonTokenType.Comment:
+                        break;
+                    case JsonTokenType.String:
+                        objPropDTO.ValueKind = DTOValueKind.String;
+                        objPropDTO.Value = reader.GetString();
+                        break;
+                    case JsonTokenType.Number:
+                        objPropDTO.ValueKind = DTOValueKind.Number;
+                        objPropDTO.Value = reader.GetDouble();
+                        break;
+                    case JsonTokenType.True:
+                        objPropDTO.ValueKind = DTOValueKind.Boolean;
+                        objPropDTO.Value = reader.GetBoolean();
+                        break;
+                    case JsonTokenType.False:
+                        objPropDTO.ValueKind = DTOValueKind.Boolean;
+                        objPropDTO.Value = reader.GetBoolean();
+                        break;
+                    case JsonTokenType.Null:
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return objPropDTO;
+        }
+
         public override void Write(Utf8JsonWriter writer, SettingDTO value, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
@@ -107,8 +196,8 @@ namespace Settings.Net.Storage.JSON
                     break;
                 case DTOValueKind.Object:
                     writer.WritePropertyName("Value");
-                    var objConv = options.GetConverter(typeof(ObjectDTO)) as JsonConverter<ObjectDTO>;
-                    objConv.Write(writer, (ObjectDTO)value.Value, options);
+                    //var objConv = options.GetConverter(typeof(ObjectDTO)) as JsonConverter<ObjectDTO>;
+                    WriteObjectDTO(writer, (ObjectDTO)value.Value);
                     break;
                 case DTOValueKind.Array:
                     break;
@@ -117,6 +206,47 @@ namespace Settings.Net.Storage.JSON
             }
 
             writer.WriteEndObject();
+        }
+
+        private void WriteObjectDTO(Utf8JsonWriter writer, ObjectDTO value) 
+        {
+            writer.WriteStartObject();
+            var props = value.objectProperties;
+
+            //var propConv = options.GetConverter(typeof(ObjectPropertiesDTO)) as JsonConverter<ObjectPropertiesDTO>;
+
+            foreach (var prop in props)
+            {
+                WriteObjectPropertyDTO(writer, prop);
+            }
+
+            writer.WriteEndObject();
+        }
+
+        private void WriteObjectPropertyDTO(Utf8JsonWriter writer, ObjectPropertiesDTO value)
+        {
+            switch (value.ValueKind)
+            {
+                case DTOValueKind.UnDefined:
+                    break;
+                case DTOValueKind.String:
+                    writer.WriteString(value.PropertyName, (string)value.Value);
+                    break;
+                case DTOValueKind.Number:
+                    writer.WriteNumber(value.PropertyName, (double)value.Value);
+                    break;
+                case DTOValueKind.Boolean:
+                    writer.WriteBoolean(value.PropertyName, (bool)value.Value);
+                    break;
+                case DTOValueKind.Object:
+                    writer.WritePropertyName(value.PropertyName);
+                    WriteObjectDTO(writer, (ObjectDTO)value.Value);
+                    break;
+                case DTOValueKind.Array:
+                    break;
+                default:
+                    break;
+            }
         }
 
     }

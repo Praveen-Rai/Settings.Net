@@ -33,8 +33,6 @@ namespace Settings.Net.Storage.JSON
         {
             serializeOptions = new JsonSerializerOptions();
             serializeOptions.Converters.Add(new JsonConverter_SettingDTO());
-            serializeOptions.Converters.Add(new JsonConverter_ObjectDTO());
-            serializeOptions.Converters.Add(new JsonConverter_ObjectPropertiesDTO());
         }
 
         public void AddSetting(SettingDTO settingDTO)
