@@ -64,7 +64,16 @@ namespace TestPlugin
         public override ValidationResult Validate(List<SettingBase> settings)
         {
 
+            // Todo : In case of multiple validations, should we concat all the error/warning messages.
+            // Or modify ValidationResult to hold messages in string[]
+            // Or should we return ValidationResult[] altogether.
+
+            // Todo : We also needs user friendly/ displayable name in the settings.
+            // Suppose this library is used in MVC web app. The user will expect setting names & not setting class names.
+            // And in this case DisplayName property must be defined in SettingBase as abstract. And we must also ensure the names remain unique, else fail during registration.
             var sampleIntSetting = settings.FirstOrDefault(x => x.SettingType == typeof(SampleIntSetting));
+
+            var sampleStringSetting = settings.FirstOrDefault(x => x.SettingType == typeof(SampleStringSetting));
 
             if (sampleIntSetting != null)
             {
@@ -82,7 +91,6 @@ namespace TestPlugin
                 return new ValidationResult() { Result = ValidationResult.ResultType.Passed, };
             }
 
-            return base.Validate(settings);
         }
 
     }

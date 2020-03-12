@@ -42,14 +42,25 @@ namespace TestClient
             var sampleEnumSetting = mgr.GetInstance<SampleCustomEnumSetting>();
 
             sampleEnumSetting.Value = SampleEnum.Value1;
-            var res = mgr.UpdateSetting(sampleEnumSetting);
+            var resultList = mgr.UpdateSetting(sampleEnumSetting);
 
-            if (res.Result == ValidationResult.ResultType.Error)
+            foreach(var result in resultList)
             {
-                Console.WriteLine(string.Format("failed to update setting {0}. Error Message : {1}", sampleEnumSetting.SettingType, res.Message));
+                switch (result.Result)
+                {
+                    case ValidationResult.ResultType.Passed:
+                        Console.WriteLine(string.Format("[Passed] Setting Name : {0}", result.SettingName));
+                        break;
+                    case ValidationResult.ResultType.Warning:
+                        Console.WriteLine(string.Format("[Warning] Setting Name : {0}", result.SettingName));
+                        break;
+                    case ValidationResult.ResultType.Error:
+                        Console.WriteLine(string.Format("[Error] Setting Name : {0}", result.SettingName));
+                        break;
+                    default:
+                        break;
+                }
             }
-            
-
         }
 
     }

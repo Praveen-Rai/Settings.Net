@@ -121,27 +121,34 @@ namespace Settings.Net.Core
             return (T)_settings.FirstOrDefault(x => x.GetType() == typeof(T));
         }
 
-        public ValidationResult UpdateSetting(SettingBase setting)
+        public ValidationResult[] UpdateSetting(SettingBase setting)
         {
-            var valRes = setting.Validate(_settings);
 
-            if (valRes.Result == ValidationResult.ResultType.Passed || valRes.Result == ValidationResult.ResultType.Warning)
+            var isSettingInList = _settings.Any(x => x.SettingType == setting.SettingType);
+            var valResult = new List<ValidationResult>();
+
+            // Setting found in the list
+            if (isSettingInList)
             {
-                var x = _settings.FirstOrDefault(x => x.SettingType == setting.SettingType);
+                // create a copy of the settings list
+                var tempSettings = _settings.ToList();
+                var indx = tempSettings.FindIndex(x => x.SettingType == setting.SettingType);
+                tempSettings[indx].SettingValue = setting.SettingValue;
 
-                if (x != null)
+                // Validate all settings against this temp list (updated value of the given setting)
+                // This is being done to ensure any dependent setting also gets to validate itself against the new value of the input setting.
+                foreach (var item in tempSettings)
                 {
-                    // Replacing the setting value, using remove and add. Since list is a ref type, a better approach might be possible. Todo:
-                    _settings.Remove(x);
-                    _settings.Add(setting);
-                }
-                else
-                {
-                    throw new ArgumentException("Setting not found");
+                    var res = item.Validate(tempSettings);
+                    valResult.Add(res);
                 }
             }
+            else
+            {
+                throw new ArgumentException("Setting not found");
+            }
 
-            return valRes;
+            return valResult.ToArray();
         }
 
         public void Save()
@@ -198,7 +205,7 @@ namespace Settings.Net.Core
                     {
                         // Todo : If property type is simple number, string or bool, just copy the value.
                         var objPropDto = objDto.objectProperties.FirstOrDefault(x => x.PropertyName == prop.Name);
-                        if(objPropDto!= null)
+                        if (objPropDto != null)
                         {
                             // Todo : If property type is a custom type, we first need to create an instance of the type an do the process re-cursively.
                             // Now it makes sense to have all these functionalites in SettingsDTOGenerator. Since, here too we need to work with DTOKinds, ObjectKind etc.
